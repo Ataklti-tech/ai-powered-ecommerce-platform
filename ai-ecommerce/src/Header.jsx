@@ -9,7 +9,7 @@ import {
   Heart,
   LogOut,
   Package,
-  Settings
+  Settings,
 } from "lucide-react";
 import "./Header.css";
 
@@ -19,7 +19,7 @@ const Header = ({
   user = null,
   onLogout,
   categories = [],
-  onSearch // Optional callback for search
+  onSearch, // Optional callback for search
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -98,7 +98,7 @@ const Header = ({
         <div className="header__logo">
           <Link to="/" className="header__logo-link">
             <ShoppingCart className="header__logo-icon" />
-            <span className="header__logo-text">ShopHub</span>
+            <span className="header__logo-text">ኣገልግል</span>
           </Link>
         </div>
 
@@ -291,7 +291,6 @@ const Header = ({
 
 export default Header;
 
-
 // import React, { useState } from 'react';
 // import { Menu, X } from 'lucide-react';
 
@@ -315,26 +314,26 @@ export default Header;
 
 //           {/* Desktop Navigation */}
 //           <div className="hidden md:flex items-center space-x-12">
-//             <a 
-//               href="/products" 
+//             <a
+//               href="/products"
 //               className="text-base font-normal hover:text-gray-300 transition-colors duration-200"
 //             >
 //               Products
 //             </a>
-//             <a 
-//               href="/about" 
+//             <a
+//               href="/about"
 //               className="text-base font-normal hover:text-gray-300 transition-colors duration-200"
 //             >
 //               About
 //             </a>
-//             <a 
-//               href="/blog" 
+//             <a
+//               href="/blog"
 //               className="text-base font-normal hover:text-gray-300 transition-colors duration-200"
 //             >
 //               Blog
 //             </a>
-//             <a 
-//               href="/contacts" 
+//             <a
+//               href="/contacts"
 //               className="text-base font-normal hover:text-gray-300 transition-colors duration-200"
 //             >
 //               Contacts
@@ -343,13 +342,13 @@ export default Header;
 
 //           {/* Desktop Auth Buttons */}
 //           <div className="hidden md:flex items-center space-x-4">
-//             <a 
+//             <a
 //               href="/signup"
 //               className="px-6 py-2.5 bg-white text-black rounded-md font-medium hover:bg-gray-100 transition-colors duration-200"
 //             >
 //               SIGN UP
 //             </a>
-//             <a 
+//             <a
 //               href="/login"
 //               className="px-6 py-2.5 border border-white text-white rounded-md font-medium hover:bg-white hover:text-black transition-all duration-200"
 //             >
@@ -378,44 +377,44 @@ export default Header;
 //       {isMobileMenuOpen && (
 //         <div className="md:hidden bg-[#252525] border-t border-gray-700">
 //           <div className="px-6 py-4 space-y-4">
-//             <a 
-//               href="/products" 
+//             <a
+//               href="/products"
 //               className="block text-base font-normal hover:text-gray-300 transition-colors duration-200 py-2"
 //               onClick={() => setIsMobileMenuOpen(false)}
 //             >
 //               Products
 //             </a>
-//             <a 
-//               href="/about" 
+//             <a
+//               href="/about"
 //               className="block text-base font-normal hover:text-gray-300 transition-colors duration-200 py-2"
 //               onClick={() => setIsMobileMenuOpen(false)}
 //             >
 //               About
 //             </a>
-//             <a 
-//               href="/blog" 
+//             <a
+//               href="/blog"
 //               className="block text-base font-normal hover:text-gray-300 transition-colors duration-200 py-2"
 //               onClick={() => setIsMobileMenuOpen(false)}
 //             >
 //               Blog
 //             </a>
-//             <a 
-//               href="/contacts" 
+//             <a
+//               href="/contacts"
 //               className="block text-base font-normal hover:text-gray-300 transition-colors duration-200 py-2"
 //               onClick={() => setIsMobileMenuOpen(false)}
 //             >
 //               Contacts
 //             </a>
-            
+
 //             <div className="pt-4 space-y-3 border-t border-gray-700">
-//               <a 
+//               <a
 //                 href="/signup"
 //                 className="block w-full px-6 py-2.5 bg-white text-black text-center rounded-md font-medium hover:bg-gray-100 transition-colors duration-200"
 //                 onClick={() => setIsMobileMenuOpen(false)}
 //               >
 //                 SIGN UP
 //               </a>
-//               <a 
+//               <a
 //                 href="/login"
 //                 className="block w-full px-6 py-2.5 border border-white text-white text-center rounded-md font-medium hover:bg-white hover:text-black transition-all duration-200"
 //                 onClick={() => setIsMobileMenuOpen(false)}
