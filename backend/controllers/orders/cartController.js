@@ -3,7 +3,7 @@ const User = require("./../../models/userModel");
 const Product = require("./../../models/productModel");
 const catchAsync = require("./../../utils/constants/catchAsync");
 const AppError = require("./../../utils/constants/appError");
-const { Cat } = require("lucide-react");
+const { trackActivity } = require("../analytics/userActivityController");
 
 // Adding product to cart
 exports.addProductToCart = catchAsync(async (req, res, next) => {
@@ -24,15 +24,15 @@ exports.addProductToCart = catchAsync(async (req, res, next) => {
     return next(new AppError("Product not found", 404));
   }
   // Check if product has sufficient stock
-  if (!product.stock < quantity) {
+  if (product.stock < quantity) {
     return next(
       new AppError(`Insufficient stock. Available: ${product.stock}`, 400)
     );
   }
   // Check if product is in stock
-  if (product.isInStock) {
-    return next(new AppError("This product is out of stock", 400));
-  }
+  // if (product.isInStock) {
+  //   return next(new AppError("This product is out of stock", 400));
+  // }
 
   // Find or create cart for user
   let cart = await Cart.findOne({ user: userId });
@@ -80,6 +80,9 @@ exports.addProductToCart = catchAsync(async (req, res, next) => {
     path: "items.product",
     select: "name price discount description images stock",
   });
+
+  // tracking add-to-cart
+  trackActivity(userId, productId, "add_to_cart");
 
   res.status(201).json({
     success: true,

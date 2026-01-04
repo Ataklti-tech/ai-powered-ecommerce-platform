@@ -4,6 +4,16 @@ class APIFeatures {
     this.queryString = queryString;
   }
 
+  search(field = "name") {
+    if (this.queryString.keyword) {
+      const keyword = this.queryString.keyword;
+      const regex = new RegExp(keyword, "i");
+      this.query = this.query.find({
+        [field]: { $regex: regex },
+      });
+    }
+    return this;
+  }
   filter() {
     // 1. Filtering
     const queryObj = { ...this.queryString };

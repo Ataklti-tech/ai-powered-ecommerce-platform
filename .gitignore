@@ -6,6 +6,7 @@ backend/node_modules/
 node_modules/
 
 # Environment variables
+backend/config.env
 .env
 
 # Build outputs

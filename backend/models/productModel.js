@@ -10,9 +10,10 @@ const productSchema = mongoose.Schema(
       trim: true,
       maxlength: [200, "Product name cannot exceed 200 characters "],
     },
+    // What is slug, how can we use it in the web app UI
     slug: {
       type: String,
-      required: true,
+      // required: true,
       unique: true,
       lowercase: true,
       index: true,
@@ -28,7 +29,7 @@ const productSchema = mongoose.Schema(
     },
     // Reference: Category
     category: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.ObjectId,
       ref: "Category",
       required: [true, "Category is required"],
       index: true,
@@ -51,7 +52,7 @@ const productSchema = mongoose.Schema(
       min: [0, "Cost price cannot be negative"],
     },
     // sku
-    // barcode
+    // barcode - How to include a barcode of a product / storing barcode in DB
     stock: {
       type: Number,
       required: [true, "Stock quantity is required"],
@@ -102,6 +103,7 @@ const productSchema = mongoose.Schema(
       },
     ],
     // Variants (Embedded)
+    // How to specify the variant / whether it represent size, color, type ...etc.
     variants: [
       {
         name: {
@@ -152,7 +154,7 @@ const productSchema = mongoose.Schema(
       average: {
         type: Number,
         default: 0,
-        min: [1, "Rating must be above 1.0"],
+        min: [0, "Rating must be above 0.0"],
         max: [5, "Rating must be below 5.0"],
       },
       count: {
@@ -168,6 +170,7 @@ const productSchema = mongoose.Schema(
       },
     },
     // Analytics (Embedded - for AI recommendation)
+    // how can we get the user who clicked/viewed/purchased/addToCart/addToWishlist of a particular product?
     analytics: {
       views: {
         type: Number,
@@ -340,7 +343,50 @@ productSchema.methods.checkStock = function (quantity = 1) {
 };
 
 // Update product analytics
+// productSchema.methods.updateAnalytics = function (action, quantity = 1) {
+//   const actions = {
+//     view: () => {
+//       this.analytics.views += 1;
+//       this.analytics.lastViewedAt = new Date();
+//     },
+//     click: () => {
+//       this.analytics.clicks += 1;
+//     },
+//     addToCart: () => {
+//       this.analytics.addToCarts += quantity;
+//     },
+//     purchase: () => {
+//       this.analytics.purchases += quantity;
+//       this.analytics.lastPurchasedAt = new Date();
+//     },
+//     wishlist: () => {
+//       this.analytics.wishlistAdds += 1;
+//     },
+//   };
+
+//   if (actions[action]) {
+//     actions[action]();
+//     this.analytics.conversionRate =
+//       (this.analytics.purchases / this.analytics.views) * 100;
+//   }
+
+//   return this;
+// };
+
 productSchema.methods.updateAnalytics = function (action, quantity = 1) {
+  // Ensure analytics object exists
+  if (!this.analytics) {
+    this.analytics = {};
+  }
+
+  // Initialize all numeric fields safely
+  this.analytics.views ??= 0;
+  this.analytics.clicks ??= 0;
+  this.analytics.addToCarts ??= 0;
+  this.analytics.purchases ??= 0;
+  this.analytics.wishlistAdds ??= 0;
+  this.analytics.conversionRate ??= 0;
+
   const actions = {
     view: () => {
       this.analytics.views += 1;
@@ -363,8 +409,14 @@ productSchema.methods.updateAnalytics = function (action, quantity = 1) {
 
   if (actions[action]) {
     actions[action]();
-    this.analytics.conversionRate =
-      (this.analytics.purchases / this.analytics.views) * 100;
+  }
+
+  if (this.analytics.views > 0) {
+    this.analytics.conversionRate = Number(
+      ((this.analytics.purchases / this.analytics.views) * 100).toFixed(2)
+    );
+  } else {
+    this.analytics.conversionRate = 0;
   }
 
   return this;

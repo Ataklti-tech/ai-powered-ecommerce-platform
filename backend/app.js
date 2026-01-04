@@ -4,17 +4,26 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
-const xss = require("xss");
+// const xss = require("xss-clean");
 
 const AppError = require("./utils/constants/appError");
-const globalErrorHandler = require("./controllers/auth/errorController");
+// const globalErrorHandler = require("./controllers/auth/errorController");
 
 const userRouter = require("./routes/auth/userRoutes");
 const authRouter = require("./routes/auth/authRoutes");
 const productRouter = require("./routes/products/productRoutes");
 const categoryRouter = require("./routes/products/categoryRoutes");
 const orderRouter = require("./routes/orders/orderRoutes");
-const paymentRouter = require("./routes/payments/paymentRoutes");
+// const paymentRouter = require("./routes/payments/paymentRoutes");
+const cartRouter = require("./routes/orders/cartRoutes");
+const reviewRouter = require("./routes/products/reviewRoutes");
+const wishlistRouter = require("./routes/products/wishlistRoutes");
+const couponRouter = require("./routes/orders/couponRoutes");
+
+const userActivityRouter = require("./routes/Analytics/userActivityRoutes");
+// Importing the rateLimiter (apiLimiter, authLimiter, ...)
+// const {apiLimiter} = require("./middleware/security/rateLimiter");
+
 const app = express();
 
 // 1. Global Middlewares
@@ -71,12 +80,20 @@ app.use((req, res, next) => {
 
 // Routes
 app.use("/api/v1/users", userRouter);
-// app.use("/api/v1/products", productRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/order", orderRouter);
+app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/review", reviewRouter);
+app.use("/api/v1/wishlist", wishlistRouter);
+app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/coupons", couponRouter);
+app.use("/api/activities", userActivityRouter);
 
 app.all(/.*/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
 
-app.use(globalErrorHandler);
+// app.use(globalErrorHandler);
 
 module.exports = app;

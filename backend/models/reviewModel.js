@@ -25,11 +25,16 @@ const reviewSchema = mongoose.Schema({
   title: {
     type: String,
     required: [true, "Review title is required"],
-    maxlength: [200, "Title cannot exceed 20 characters"],
+    maxlength: [200, "Title cannot exceed 200 characters"],
   },
   comment: {
     type: String,
     required: [true, "Review comment is required"],
     maxlength: [3000, "Comment cannot exceed 3000 characters"],
   },
+
+  // timestamps: true,
 });
+
+const Review = mongoose.model("Review", reviewSchema);
+module.exports = Review;

@@ -16,11 +16,11 @@ const categorySchema = mongoose.Schema(
     },
     description: String,
     image: String,
-    parent: {
-      type: mongoose.Schema.ObjectId,
-      ref: "Category",
-      default: null,
-    },
+    // parent: {
+    //   type: mongoose.Schema.ObjectId,
+    //   ref: "Category",
+    //   default: null,
+    // },
     isActive: {
       type: Boolean,
       default: true,

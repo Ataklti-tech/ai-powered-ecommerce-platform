@@ -4,6 +4,7 @@ const AppError = require("./../../utils/constants/appError");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
+const sendEmail = require("./../../services/email/emailService");
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -36,25 +37,23 @@ const createSendToken = (user, statusCode, res) => {
 
 // Getting all users of the app
 // function to get paginated list of users
-exports.getAllUsers = catchAsync(async (req, resizeBy, next) => {
+exports.getAllUsers = catchAsync(async (req, res, next) => {
   // set up pagination parameters
   const page = req.query.page || 1;
   const limit = req.query.limit || 10;
   const skip = (page - 1) * limit;
 
   // fetching users excluding passwords, with pagination and sorting
-  const users = User.find()
+  const users = await User.find()
     .select("-password")
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 });
   // send status
-  req.status(200).json({
+  res.status(200).json({
     status: "success",
     results: users.length,
-    date: {
-      users,
-    },
+    date: users,
   });
 });
 

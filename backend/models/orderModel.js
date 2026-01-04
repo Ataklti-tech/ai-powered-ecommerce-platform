@@ -55,6 +55,12 @@ const orderSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    coupon: {
+      code: String,
+      discountType: String,
+      discountValue: Number,
+      discountAmount: Number,
+    },
     // Shipping Address
     shippingAddress: {
       firstName: String,
@@ -93,10 +99,19 @@ const orderSchema = mongoose.Schema(
       status: {
         type: String,
         enum: ["pending", "completed", "failed", "refunded"],
-        default: "pending",
+        default: "completed",
+        index: true,
       },
-      transactionId: String,
+      // Gateway details
+      gateway: {
+        type: String,
+        enum: ["stripe", "paypal", "mtn_momo"],
+      },
+      // transactionId: { type: String, sparse: true },
       paidAt: Date,
+      gatewayReference: {
+        type: String,
+      },
     },
     // Shipping
     shipping: {
@@ -117,7 +132,8 @@ const orderSchema = mongoose.Schema(
         "cancelled",
         "returned",
       ],
-      default: "pending",
+      // default: "pending",
+      default: "delivered",
     },
     statusHistory: [
       {
@@ -143,6 +159,16 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+// What are indexes and how do they work in mongodb/mongoose?
+// How/where/when to implement indexes?
+
+orderSchema.pre("save", function (next) {
+  if (!this.orderNumber) {
+    this.orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  }
+  next();
+});
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

@@ -13,6 +13,7 @@ router.get("/profile", protect, userController.getCurrentUser);
 // Admin only routes
 // Get all users
 router.get("/", protect, userController.getAllUsers);
+// router.get("/", userController.getAllUsers);
 
 // Get single user by id
 router.get("/:id", protect, userController.getUser);

@@ -21,6 +21,7 @@ const userActivitySchema = mongoose.Schema(
         "purchase",
         "wishlist_add",
         "review",
+        "search",
       ],
       required: true,
     },

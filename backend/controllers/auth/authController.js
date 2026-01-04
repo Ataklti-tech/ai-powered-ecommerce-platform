@@ -3,6 +3,8 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const catchAsync = require("./../../utils/constants/catchAsync");
 const AppError = require("./../../utils/constants/appError");
+const { protect } = require("./../../middleware/auth/authenticate");
+const sendEmail = require("./../../services/email/emailService");
 
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
@@ -120,13 +122,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     return next(new AppError("There is no user with email address", 404));
   }
   // 2. Generate the random reset token
-  const resetToken = user.createPasswordResetToken();
+  const resetToken = await user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
   // 3. Send it to user's email
   const resetURL = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/resetPassword/${resetToken}`;
+  )}/api/v1/auth/resetPassword/${resetToken}`;
 
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email`;
 
@@ -152,6 +154,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
+// After forgot password - resetPassword comes
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1. Get user based on the token
   const hashedToken = crypto
@@ -171,6 +174,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
+  user.passwordChangedAt = Date.now();
   await user.save();
   // 3. Update changePasswordAt property for the user
 
@@ -179,7 +183,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
-  // 1. Get user from collection
+  // 1. Get user from collection/database
   const user = await User.findById(req.user.id).select("+password");
   // 2. Check if posted current password is correct
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
