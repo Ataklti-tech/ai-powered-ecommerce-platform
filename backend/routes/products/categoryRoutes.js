@@ -18,6 +18,7 @@ router.post(
 router.post("/:id", categoryController.getCategory);
 
 // get category by slug
+// router.get();
 // update category
 //
 

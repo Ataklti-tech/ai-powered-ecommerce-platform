@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "./Header";
 import { BrowserRouter as Router } from "react-router-dom";
+// import FeaturedProducts from "./pages/Home/FeaturedProducts";
 
 const App = () => {
   return (
@@ -8,6 +9,7 @@ const App = () => {
       {" "}
       {/* ← WRAP EVERYTHING IN ROUTER */}
       <Header cartItemCount={0} isAuthenticated={false} />
+      {/* <FeaturedProducts /> */}
       {/* <Header/> */}
       {/* Your routes and other components */}
     </Router>

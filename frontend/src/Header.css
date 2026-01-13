@@ -34,11 +34,13 @@
 }
 
 .header__logo-link:hover {
-  color: #4f46e5;
+  /* color: #4f46e5; */
+  color: #10b981;
 }
 
 .header__logo-icon {
-  color: #4f46e5;
+  /* color: #4f46e5; */
+  color: #10b981;
 }
 
 /* Navigation */
@@ -57,7 +59,8 @@
 }
 
 .header__nav-link:hover {
-  color: #4f46e5;
+  /* color: #4f46e5; */
+  color: #10b981;
 }
 
 .header__nav-dropdown {
