@@ -205,7 +205,7 @@ exports.searchCategories = catchAsync(async (req, res, next) => {
 
   if (!query || query.length < 2) {
     return next(
-      new ErrorHandler("Search query must be at least 2 characters", 400)
+      new ErrorHandler("Search query must be at least 2 characters", 400),
     );
   }
 
@@ -232,7 +232,7 @@ exports.searchCategories = catchAsync(async (req, res, next) => {
 exports.getPopularCategories = catchAsync(async (req, res, next) => {
   const apiFeatures = APIFeatures(
     Category.find({ isActive: true }),
-    req.query
+    req.query,
   ).limit();
 
   const category = await apiFeatures.query;
@@ -244,7 +244,7 @@ exports.getPopularCategories = catchAsync(async (req, res, next) => {
         category: category._id,
         status: "active",
       });
-    })
+    }),
   );
   const popular = categoriesWithCount
     .sort((a, b) => b.productCount - a.productCount)
@@ -308,7 +308,7 @@ exports.getCategoryStatistics = catchAsync(async (req, res, next) => {
         status: "active",
       });
       return { name: cat.name, count };
-    })
+    }),
   );
 
   const topCategories = categoriesWithCounts
