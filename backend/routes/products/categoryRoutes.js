@@ -11,11 +11,11 @@ router.post(
   "/create-category",
   protect,
   // restrictTo("admin"),
-  categoryController.createCategory
+  categoryController.createCategory,
 );
 
 // get a single category by category id
-router.post("/:id", categoryController.getCategory);
+router.get("/:id", categoryController.getCategory);
 
 // get category by slug
 // router.get();

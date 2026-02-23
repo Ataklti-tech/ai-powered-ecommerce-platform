@@ -1,22 +1,23 @@
-import React from "react";
-import Header from "./Header";
-import { BrowserRouter as Router } from "react-router-dom";
-// import FeaturedProducts from "./pages/Home/FeaturedProducts";
+// import React from "react";
+// // import Navbar from "././components/common/Header/Header2";
+// import Navbar from "./components/Navbar";
+// import { BrowserRouter as Router } from "react-router-dom";
+// // import FeaturedProducts from "./pages/Home/FeaturedProducts";
 
-const App = () => {
-  return (
-    <Router>
-      {" "}
-      {/* ← WRAP EVERYTHING IN ROUTER */}
-      <Header cartItemCount={0} isAuthenticated={false} />
-      {/* <FeaturedProducts /> */}
-      {/* <Header/> */}
-      {/* Your routes and other components */}
-    </Router>
-  );
-};
+// const App = () => {
+//   return (
+//     <Router>
+//       {" "}
+//       {/* ← WRAP EVERYTHING IN ROUTER */}
+//       <Navbar />
+//       {/* <FeaturedProducts /> */}
+//       {/* <Header/> */}
+//       {/* Your routes and other components */}
+//     </Router>
+//   );
+// };
 
-export default App;
+// export default App;
 
 // import React, { useState, useEffect } from "react";
 // import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -175,3 +176,49 @@ export default App;
 // }
 
 // export default App;
+import React from "react";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Stats from "./components/Stats";
+import Categories from "./components/Categories";
+import AIRecommendations from "./components/AIRecommendations";
+import Features from "./components/Features";
+import TrendingProducts from "./components/TrendingProducts";
+import CTASection from "./components/CTASection";
+import Footer from "./components/Footer";
+import Login from "./components/auth/LoginForm/LoginForm";
+import RegisterForm from "./components/auth/RegisterForm/RegisterForm";
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-white">
+      {/* <Navbar />
+      <Hero />
+      <Stats />
+      <Categories />
+      <AIRecommendations />
+      <Features />
+      <TrendingProducts />
+      <CTASection />
+      <Footer /> */}
+      {/* <Login /> */}
+      <RegisterForm />
+
+      <style jsx>{`
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        .animate-float {
+          animation: float 2s ease-in-out infinite;
+        }
+      `}</style>
+    </div>
+  );
+}

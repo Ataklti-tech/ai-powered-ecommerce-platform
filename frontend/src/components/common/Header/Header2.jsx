@@ -29,7 +29,7 @@ const Navbar = () => {
                 <span>AI Picks</span>
               </button>
 
-              <button className="relative text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">
+              <button className="relative text-gray-600 hover:text-gray-900 transition-colors">
                 <ShoppingCart className="w-5 h-5" />
                 {cart > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-orange-500 text-white text-[10px] rounded-full flex items-center justify-center font-medium">

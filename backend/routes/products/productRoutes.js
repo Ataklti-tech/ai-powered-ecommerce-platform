@@ -4,12 +4,13 @@ const productController = require("./../../controllers/products/productControlle
 const { protect, restrictTo } = require("./../../middleware/auth/authenticate");
 
 // get all products
-router.get("/", protect, restrictTo("admin"), productController.getAllProducts);
+// router.get("/", protect, restrictTo("admin"), productController.getAllProducts);
+router.get("/", productController.getAllProducts);
 
 // create product (admin only)
 // router.post("/", protect, restrictTo("admin"), productController.createProduct);
-router.post("/", protect, restrictTo("admin"), productController.createProduct);
-
+// router.post("/", protect, restrictTo("admin"), productController.createProduct);
+router.post("/", productController.createProduct);
 // get featured products
 router.get("/featured", productController.getFeaturedProducts);
 
@@ -21,7 +22,7 @@ router.patch(
   "/:id",
   protect,
   restrictTo("admin"),
-  productController.updateProduct
+  productController.updateProduct,
 );
 
 // delete product (admin only)
@@ -29,7 +30,7 @@ router.delete(
   "/:id",
   protect,
   restrictTo("admin"),
-  productController.deleteProduct
+  productController.deleteProduct,
 );
 
 // search product
@@ -76,14 +77,14 @@ router.get(
   "/admin/low-stock",
   protect,
   restrictTo("admin"),
-  productController.getLowStockProducts
+  productController.getLowStockProducts,
 );
 
 // update analytics
 router.patch(
   ":id/analytics",
   protect,
-  productController.updateProductAnalytics
+  productController.updateProductAnalytics,
 );
 
 // bulk update
@@ -91,7 +92,7 @@ router.patch(
   "/admin/bulk-status",
   protect,
   restrictTo("admin"),
-  productController.bulkUpdateStatus
+  productController.bulkUpdateStatus,
 );
 
 // product statistics
@@ -99,7 +100,7 @@ router.get(
   "/admin/statistics",
   protect,
   restrictTo("admin"),
-  productController.getProductStatistics
+  productController.getProductStatistics,
 );
 
 // Stock management routes - Protected
@@ -107,13 +108,13 @@ router.patch(
   "/:id/reduce-stock",
   protect,
   restrictTo("admin"),
-  productController.reduceStock
+  productController.reduceStock,
 );
 router.patch(
   "/:id/restore-stock",
   protect,
   restrictTo("admin"),
-  productController.restoreStock
+  productController.restoreStock,
 );
 
 // Rating routes - Protected
