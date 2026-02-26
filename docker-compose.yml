@@ -1,10 +1,197 @@
+# name: e_commerce
+
+# version: '3.9'
+
+# services:
+#   backend:
+#     build: ./backend
+#     container_name: e_commerce-backend
+#     restart: unless-stopped
+#     ports:
+#       - '5000:5000'
+#     env_file:
+#       - backend/config.env
+#     volumes:
+#       - ./backend:/app
+#       - /app/node_modules
+#     depends_on:
+#       mongodb:
+#         condition: service_healthy
+#     networks:
+#       - e_commerce_network
+#     command: npm run dev
+#   frontend:
+#     build: ./frontend
+#     container_name: e_commerce-frontend
+#     ports:
+#       - '3000:3000'
+#     env_file:
+#       - backend/config.env
+#     restart: unless-stopped
+#   mongodb:
+#     image: mongo:latest
+#     container_name: e_commerce-mongodb
+#     ports:
+#       - '27017:27017'
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
+#       MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+#       MONGO_INITDB_DATABASE: ${DATABASE}
+#     volumes:
+#       - mongo_data:/data/db
+#     restart: unless-stopped
+
+# volumes:
+#   mongo_data:
+
+# //////////////////////////////////////////////
+# name: e_commerce
+
+# # version: '3.9'
+
+# services:
+#   backend:
+#     build: ./backend
+#     container_name: e_commerce_backend
+#     restart: unless-stopped
+#     ports:
+#       - '5000:5000'
+#     env_file:
+#       - backend/config.env
+#     volumes:
+#       - ./backend:/app
+#       - /app/node_modules
+#     depends_on:
+#       mongodb:
+#         condition: service_healthy
+#     networks:
+#       - e_commerce_network
+#     command: npm run dev
+
+#   frontend:
+#     build: ./frontend
+#     container_name: e_commerce_frontend
+#     restart: unless-stopped
+#     ports:
+#       - '3000:3000'
+#     env_file:
+#       - backend/.env
+#     volumes:
+#       - ./frontend:/app
+#       - /app/node_modules
+#     depends_on:
+#       - backend
+#     networks:
+#       - e_commerce_network
+
+#   mongodb:
+#     image: mongo:latest
+#     container_name: e_commerce_mongodb
+#     restart: unless-stopped
+#     ports:
+#       - '27017:27017'
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
+#       MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+#       MONGO_INITDB_DATABASE: ${DATABASE}
+#     volumes:
+#       - mongo_data:/data/db
+#     healthcheck:
+#       test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     networks:
+#       - e_commerce_network
+
+# networks:
+#   e_commerce_network:
+#     driver: bridge
+
+# volumes:
+#   mongo_data:
+
+# //////////////////////////////////////////////
 name: e_commerce
 
 services:
-  api:
+  # ────────────────────────────────────────────────
+  # MongoDB Database
+  # ────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: e_commerce_mongodb
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DATABASE}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - e_commerce_network
+
+  # ────────────────────────────────────────────────
+  # Backend API (Node.js + Express)
+  # ────────────────────────────────────────────────
+  backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: e_commerce_backend
     restart: unless-stopped
-    env_file: /backend/.env
-    ports: -5000:5000
+    ports:
+      - '5000:5000'
+    env_file:
+      - ./backend/config.env # runtime env for backend (JWT, PORT, NODE_ENV, etc.)
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - e_commerce_network
+    command: npm run dev # for dev, use nodemon. Change to 'npm start' for prod
+
+  # ────────────────────────────────────────────────
+  # Frontend (React + Vite)
+  # ────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: e_commerce_frontend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env # runtime env for frontend (VITE_API_URL)
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - e_commerce_network
+
+# ────────────────────────────────────────────────
+# Networks
+# ────────────────────────────────────────────────
+networks:
+  e_commerce_network:
+    driver: bridge
+
+# ────────────────────────────────────────────────
+# Volumes
+# ────────────────────────────────────────────────
+volumes:
+  mongo_data:
+    driver: local
