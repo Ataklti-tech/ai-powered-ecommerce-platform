@@ -119,7 +119,7 @@ services:
   # MongoDB Database
   # ────────────────────────────────────────────────
   mongodb:
-    image: mongo:7.0
+    image: mongo:latest
     container_name: e_commerce_mongodb
     restart: unless-stopped
     ports:
