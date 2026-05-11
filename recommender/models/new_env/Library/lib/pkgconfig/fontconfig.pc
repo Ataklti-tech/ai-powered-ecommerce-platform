@@ -1,0 +1,16 @@
+prefix=C:/Users/hp/Desktop/e_commerce/recommender/models/new_env/Library
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+sysconfdir=C:/Users/hp/Desktop/e_commerce/recommender/models/new_env/Library/etc
+localstatedir=C:/Users/hp/Desktop/e_commerce/recommender/models/new_env/Library/var
+confdir=C:/Users/hp/Desktop/e_commerce/recommender/models/new_env/Library/etc/fonts
+cachedir=LOCAL_APPDATA_FONTCONFIG_CACHE
+
+Name: Fontconfig
+Description: Font configuration and customization library
+Version: 2.15.0
+Requires: freetype2 >=  21.0.15
+Libs: -L${libdir} -lfontconfig
+Libs.private: C:/Users/hp/Desktop/e_commerce/recommender/models/new_env/Library/lib/expat.lib
+Cflags: -I${includedir}

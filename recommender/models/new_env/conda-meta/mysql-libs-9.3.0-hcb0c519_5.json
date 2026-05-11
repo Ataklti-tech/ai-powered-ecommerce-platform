@@ -1,0 +1,55 @@
+{
+  "name": "mysql-libs",
+  "version": "9.3.0",
+  "build": "hcb0c519_5",
+  "build_number": 5,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64",
+  "subdir": "win-64",
+  "fn": "mysql-libs-9.3.0-hcb0c519_5.conda",
+  "md5": "fb4c30405ec3023634ab5b23fe3d2e5b",
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/mysql-libs-9.3.0-hcb0c519_5.conda",
+  "sha256": "e1564acdff4bac6688a9c23d925adcd4d79df1cecfa78bb275e99062cf8d354b",
+  "depends": [
+    "mysql-common 9.3.0 h0b12ad4_5",
+    "openssl >=3.0.19,<4.0a0",
+    "ucrt >=10.0.20348.0",
+    "vc >=14.3,<15",
+    "vc14_runtime >=14.44.35208",
+    "zlib >=1.2.13,<2.0a0",
+    "zstd >=1.5.6,<1.6.0a0"
+  ],
+  "constrains": [],
+  "license": "GPL-2.0-or-later",
+  "timestamp": 1771842286000,
+  "size": 1290235,
+  "requested_spec": "None",
+  "package_tarball_full_path": "C:\\Users\\hp\\miniconda3\\pkgs\\mysql-libs-9.3.0-hcb0c519_5.conda",
+  "extracted_package_dir": "C:\\Users\\hp\\miniconda3\\pkgs\\mysql-libs-9.3.0-hcb0c519_5",
+  "files": [
+    "Library/bin/libmysql.dll",
+    "Library/lib/libmysql.lib"
+  ],
+  "paths_data": {
+    "paths_version": 1,
+    "paths": [
+      {
+        "_path": "Library/bin/libmysql.dll",
+        "path_type": "hardlink",
+        "sha256": "3198d8b24aa3cd7a4ee52dcc4fe7522e1040a6dc17ee69121546171727e4cec5",
+        "size_in_bytes": 6507336,
+        "sha256_in_prefix": "3198d8b24aa3cd7a4ee52dcc4fe7522e1040a6dc17ee69121546171727e4cec5"
+      },
+      {
+        "_path": "Library/lib/libmysql.lib",
+        "path_type": "hardlink",
+        "sha256": "cdfad4d93a6969fdd61030f9840f69c7b512fcdbf1cbc8c1568e616a1f148317",
+        "size_in_bytes": 32180,
+        "sha256_in_prefix": "cdfad4d93a6969fdd61030f9840f69c7b512fcdbf1cbc8c1568e616a1f148317"
+      }
+    ]
+  },
+  "link": {
+    "source": "C:\\Users\\hp\\miniconda3\\pkgs\\mysql-libs-9.3.0-hcb0c519_5",
+    "type": 1
+  }
+}
