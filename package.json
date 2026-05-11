@@ -1,6 +1,29 @@
 {
   "dependencies": {
     "lucide-react": "^0.544.0",
-    "react-router-dom": "^7.9.3"
+    "react-router-dom": "^7.9.3",
+    "uvicorn": "^0.0.1-security"
+  },
+  "devDependencies": {
+    "eslint": "^10.0.2",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "backend/**/*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "frontend/**/*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "scripts": {
+    "prepare": "husky install"
   }
 }
