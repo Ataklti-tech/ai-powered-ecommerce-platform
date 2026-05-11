@@ -1,123 +1,98 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const productController = require("./../../controllers/products/productController");
-const { protect, restrictTo } = require("./../../middleware/auth/authenticate");
+const productController = require('./../../controllers/products/productController');
+const { protect, restrictTo } = require('./../../middleware/auth/authenticate');
+const {
+  uploadProductImages,
+  processProductImages,
+} = require('../../middleware/upload/s3Upload');
 
-// get all products
-// router.get("/", protect, restrictTo("admin"), productController.getAllProducts);
-router.get("/", productController.getAllProducts);
+// ─── Public routes ────────────────────────────────────────────────────────
+router.get('/', productController.getAllProducts);
+router.get('/featured', productController.getFeaturedProducts);
+router.get('/best-sellers', productController.getBestsellers);
+router.get('/new-arrivals', productController.getNewArrivals);
+router.get('/on-sale', productController.getOnSale);
+router.get('/trending', productController.getTrending);
+router.get('/hot', productController.getHotProducts);
+router.get('/slug/:slug', productController.getProductBySlug);
+router.get('/category/:categoryId', productController.getByCategory);
+router.get('/category-name/:categoryName', productController.getByCategoryName);
+router.get('/search', productController.searchProducts);
 
-// create product (admin only)
-// router.post("/", protect, restrictTo("admin"), productController.createProduct);
-// router.post("/", protect, restrictTo("admin"), productController.createProduct);
-router.post("/", productController.createProduct);
-// get featured products
-router.get("/featured", productController.getFeaturedProducts);
-
-// get a single product with id
-router.get("/:id", productController.getProduct);
-
-// update product
-router.patch(
-  "/:id",
+// ─── Admin-only management routes ────────────────────────────────────────
+router.get(
+  '/admin/low-stock',
   protect,
-  restrictTo("admin"),
-  productController.updateProduct,
+  restrictTo('admin'),
+  productController.getLowStockProducts
+);
+router.get(
+  '/admin/statistics',
+  protect,
+  restrictTo('admin'),
+  productController.getProductStatistics
+);
+router.patch(
+  '/admin/bulk-status',
+  protect,
+  restrictTo('admin'),
+  productController.bulkUpdateStatus
 );
 
-// delete product (admin only)
+// Create product (admin) — supports multipart/form-data with S3 image upload
+router.post(
+  '/',
+  protect,
+  restrictTo('admin'),
+  uploadProductImages,
+  processProductImages,
+  productController.createProduct
+);
+
+// ─── Single product routes ────────────────────────────────────────────────
+router.get('/:id', productController.getProduct);
+router.get('/:id/related', productController.getRelatedProducts);
+router.get('/:id/reviews', productController.getProductWithReviews);
+
+// Update product (admin) — supports S3 image upload
+router.patch(
+  '/:id',
+  protect,
+  restrictTo('admin'),
+  uploadProductImages,
+  processProductImages,
+  productController.updateProduct
+);
+
+// Delete product (admin)
 router.delete(
-  "/:id",
+  '/:id',
   protect,
-  restrictTo("admin"),
-  productController.deleteProduct,
+  restrictTo('admin'),
+  productController.deleteProduct
 );
 
-// search product
-router.get("/search", productController.searchProducts);
+// Add to cart / wishlist (user)
+router.post('/:id/cart', protect, productController.addToCart);
+router.post('/:id/wishlist', protect, productController.addToWishlist);
 
-// get best seller products
-router.get("/best-sellers", productController.getBestsellers);
-
-// new arrivals
-router.get("/new-arrivals", productController.getNewArrivals);
-
-// on sale
-router.get("/on-sale", productController.getOnSale);
-
-// trending
-router.get("/trending", productController.getTrending);
-
-// hot
-router.get("/hot", productController.getHotProducts);
-
-// get by category
-router.get("/category/:categoryId", productController.getByCategory);
-
-// get related products
-router.get("/:id/related", productController.getRelatedProducts);
-
-// get reviews of a product
-router.get("/:id/reviews", productController.getProductWithReviews);
-
-// get product by slug
-router.get("/slug/:slug", productController.getProductBySlug);
-
-// get product api
-router.get("/:id", productController.getProductAPI);
-
-// add product to cart
-router.post("/:id/cart", protect, productController.addToCart);
-
-// add product to wishlist
-router.post("/:id/wishlist", protect, productController.addToWishlist);
-
-// get low stock products
-router.get(
-  "/admin/low-stock",
-  protect,
-  restrictTo("admin"),
-  productController.getLowStockProducts,
-);
-
-// update analytics
+// Stock management (admin)
 router.patch(
-  ":id/analytics",
+  '/:id/reduce-stock',
   protect,
-  productController.updateProductAnalytics,
-);
-
-// bulk update
-router.patch(
-  "/admin/bulk-status",
-  protect,
-  restrictTo("admin"),
-  productController.bulkUpdateStatus,
-);
-
-// product statistics
-router.get(
-  "/admin/statistics",
-  protect,
-  restrictTo("admin"),
-  productController.getProductStatistics,
-);
-
-// Stock management routes - Protected
-router.patch(
-  "/:id/reduce-stock",
-  protect,
-  restrictTo("admin"),
-  productController.reduceStock,
+  restrictTo('admin'),
+  productController.reduceStock
 );
 router.patch(
-  "/:id/restore-stock",
+  '/:id/restore-stock',
   protect,
-  restrictTo("admin"),
-  productController.restoreStock,
+  restrictTo('admin'),
+  productController.restoreStock
 );
 
-// Rating routes - Protected
-router.patch("/:id/rating", protect, productController.updateProductRating);
+// Analytics & rating (authenticated)
+router.patch('/:id/analytics', protect, productController.updateProductAnalytics);
+router.patch('/:id/rating', protect, productController.updateProductRating);
 
 module.exports = router;
