@@ -12,86 +12,49 @@ exports.addProductToWishlist = catchAsync(async (req, res, next) => {
   const { productId } = req.body;
   const userId = req.user.id;
 
-  // validate input
   if (!productId) {
     return next(new AppError("Product ID is required", 400));
   }
 
-  // Check if product exists
   const product = await Product.findById(productId);
   if (!product) {
     return next(new AppError("Product not found", 404));
   }
 
-  // V1 - Codes
-  // Get user
-  // const user = await User.findById(userId);
-  // if (!user) {
-  //   return next(new AppError("User not found", 404));
-  // }
-
-  // // Check if product already in wishlist
-  // if (user.wishList && user.wishList.includes(productId)) {
-  //   return next(new AppError("Product already in wishlist", 400));
-  // }
-
-  // // Add to wishlist
-  // if (!user.wishList) {
-  //   user.wishList = [];
-  // }
-  // user.wishList.push(productId);
-  // await user.save();
-
-  // // Track analytics
-  // product.updateAnalytics("wishlist");
-  // await product.save();
-
-  // Populate wishlist with product details
-  // await user.populate("wishList", "name price image discount");
-
-  // V2 - Codes
   let wishlist = await Wishlist.findOne({ user: userId });
   if (!wishlist) {
-    wishlist = await Wishlist.create({
-      user: userId,
-      items: [],
-    });
+    wishlist = await Wishlist.create({ user: userId, items: [] });
   }
 
-  // Check if already in wishlist
   const exists = wishlist.items.some(
     (item) => item.product.toString() === productId
   );
-
   if (exists) {
     return next(new AppError("Product already in wishlist", 400));
   }
 
-  wishlist.items.push({
-    product: productId,
-    priceAtAddition: product.price,
-  });
-
+  wishlist.items.push({ product: productId, priceAtAddition: product.price });
   wishlist.totalItems = wishlist.items.length;
   await wishlist.save();
 
-  // Analytics (safe)
   product.updateAnalytics("wishlist");
-
-  // tracking wishlist add activity
   trackActivity(userId, productId, "wishlist_add");
   await product.save();
+
+  await wishlist.populate({
+    path: "items.product",
+    select: "name price discount images isInStock stock rating",
+  });
 
   res.status(201).json({
     success: true,
     message: "Product added to wishlist successfully",
     wishlistCount: wishlist.totalItems,
-    data: wishlist,
+    data: wishlist.items,
   });
 });
 
 // remove product from wishlist
-// user removes a product from their wishlist
 exports.removeProductFromWishlist = catchAsync(async (req, res, next) => {
   const { productId } = req.params;
   const userId = req.user.id;
@@ -100,33 +63,32 @@ exports.removeProductFromWishlist = catchAsync(async (req, res, next) => {
     return next(new AppError("Product ID is required", 400));
   }
 
-  // Get user
-  const user = await User.findById(userId);
-  if (!user) {
-    return next(new AppError("User not found", 404));
+  const wishlist = await Wishlist.findOne({ user: userId });
+  if (!wishlist) {
+    return next(new AppError("Wishlist not found", 404));
   }
 
-  // Check if product in wishlist
-  const wishlistIndex = user.wishlist.findIndex(
-    (id) => id.toString() === productId
+  const itemIndex = wishlist.items.findIndex(
+    (item) => item.product.toString() === productId
   );
-
-  if (wishlistIndex === -1) {
+  if (itemIndex === -1) {
     return next(new AppError("Product not found in wishlist", 404));
   }
 
-  // Remove from wishlist
-  user.wishlist.splice(wishlistIndex, 1);
-  await user.save();
+  wishlist.items.splice(itemIndex, 1);
+  wishlist.totalItems = wishlist.items.length;
+  await wishlist.save();
 
-  // Populate and return
-  await user.populate("wishlist", "name price image");
+  await wishlist.populate({
+    path: "items.product",
+    select: "name price discount images isInStock stock rating",
+  });
 
   res.status(200).json({
     success: true,
     message: "Product removed from wishlist successfully",
-    wishlistCount: user.wishlist.length,
-    data: user.wishlist,
+    wishlistCount: wishlist.totalItems,
+    data: wishlist.items,
   });
 });
 
