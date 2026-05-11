@@ -48,14 +48,30 @@ exports.getAllCategories = catchAsync(async (req, res, next) => {
     .paginate()
     .limitFields();
 
-  const categories = await apiFeatures.query;
-  const totalCategories = await Category.countDocuments();
+  const [categories, totalCategories, productCounts] = await Promise.all([
+    apiFeatures.query,
+    Category.countDocuments(),
+    Product.aggregate([
+      { $match: { status: 'active' } },
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+    ]),
+  ]);
+
+  const countMap = {};
+  productCounts.forEach(({ _id, count }) => {
+    if (_id) countMap[_id.toString()] = count;
+  });
+
+  const data = categories.map((cat) => ({
+    ...cat.toObject(),
+    productCount: countMap[cat._id.toString()] ?? 0,
+  }));
 
   res.status(200).json({
-    status: "success",
-    count: categories.length,
+    status: 'success',
+    count: data.length,
     totalCategories,
-    data: categories,
+    data,
   });
 });
 
