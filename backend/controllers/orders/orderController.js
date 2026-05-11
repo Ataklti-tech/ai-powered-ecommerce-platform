@@ -7,7 +7,6 @@ const AppError = require("./../../utils/constants/appError");
 const Cart = require("./../../models/cartModel");
 const sendEmail = require("./../../services/email/emailService");
 const Coupon = require("./../../models/couponModel");
-const { trace } = require("../../routes/auth/userRoutes");
 const { trackActivity } = require("../analytics/userActivityController");
 
 // When user clicks "Place Order" button in checkout
@@ -96,7 +95,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
       isActive: true,
     });
 
-    if (coupon && new Date() < coupon.expiryDate) {
+    if (coupon && new Date() < coupon.validUntil) {
       if (coupon.discountType === "percentage") {
         couponDiscount = (total * coupon.discountValue) / 100;
       } else {
@@ -116,7 +115,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     shippingAddress,
     payment: {
       method: paymentMethod,
-      status: "completed",
+      status: "pending",
     },
     subtotal,
     discount: {
@@ -124,9 +123,13 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     },
     tax,
     totalAmount: finalTotal,
-
-    paymentStatus: "completed",
+    status: "pending",
   });
+
+  // Track purchase activity for recommendation engine
+  for (const item of orderItems) {
+    await trackActivity(userId, item.product, "purchase", {});
+  }
 
   // 7. Reduce product stock
   for (let item of cart.items) {
@@ -147,21 +150,16 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     }
   );
 
-  // 9. Send order confirmation email / development phase using mailtrap + nodemailer
-  const emailMessage = `
-    Your order has been placed successfully!
-    Order ID: ${order.orderNumber}
-    Total: $${finalTotal}
-    Status: Pending Payment
-
-    Please proceed with payment to confirm your order.
-  `;
-
-  await sendEmail({
-    email: req.user.email,
-    subject: "Order Confirmation - Pending Payment",
-    message: emailMessage,
-  });
+  // 9. Send order confirmation email
+  try {
+    await sendEmail({
+      email: req.user.email,
+      subject: "Order Confirmation - Pending Payment",
+      message: `Your order has been placed successfully!\nOrder ID: ${order.orderNumber}\nTotal: ${finalTotal}\nStatus: Pending Payment\n\nPlease proceed with payment to confirm your order.`,
+    });
+  } catch (emailErr) {
+    console.error("Order confirmation email failed:", emailErr.message);
+  }
 
   // Populate and return order
   await order.populate("items.product user");
@@ -192,7 +190,7 @@ exports.getAllOrders = catchAsync(async (req, res, next) => {
 
   // Get orders for this user only
   const orders = await Order.find({ user: userId })
-    .populate("items.product", "name price image")
+    .populate("items.product", "name price images discount")
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
@@ -324,7 +322,7 @@ exports.cancelOrder = catchAsync(async (req, res, next) => {
 
   // Update order status
   order.status = "cancelled";
-  order.paymentStatus = "refunded";
+  order.payment.status = "refunded";
   await order.save();
 
   // Send cancellation email
@@ -354,15 +352,15 @@ exports.updatePaymentStatus = catchAsync(async (req, res, next) => {
   }
 
   // Only allow certain transitions
-  if (!["paid", "failed", "pending"].includes(paymentStatus)) {
+  if (!["completed", "failed", "pending"].includes(paymentStatus)) {
     return next(new AppError("Invalid payment status", 400));
   }
 
-  order.paymentStatus = paymentStatus;
-  order.transactionId = transactionId;
+  order.payment.status = paymentStatus;
+  if (transactionId) order.payment.gatewayReference = transactionId;
 
   // If payment is successful, confirm order
-  if (paymentStatus === "paid") {
+  if (paymentStatus === "completed") {
     order.status = "confirmed";
 
     await sendEmail({
@@ -490,7 +488,7 @@ exports.getOrderStatistics = catchAsync(async (req, res, next) => {
 
   // Calculate total revenue
   const revenueData = await Order.aggregate([
-    { $match: { paymentStatus: "paid" } },
+    { $match: { "payment.status": "completed" } },
     { $group: { _id: null, totalRevenue: { $sum: "$totalAmount" } } },
   ]);
 
