@@ -1,6 +1,22 @@
-import React, { useState } from "react";
-const [cart, setCart] = useState(0);
-const Navbar = () => {
+import React, { useState } from 'react';
+import {
+  ShoppingCart,
+  User,
+  Search,
+  Menu,
+  X,
+  Heart,
+  LogOut,
+  Package,
+  Settings,
+} from 'lucide-react';
+
+export default function Navbar() {
+  const [cart, setCart] = useState(1);
+  const [wishlist, setWishList] = useState(0);
+
+  const navLinks = ['Home', 'Products', 'Categories', 'About'];
+
   return (
     <div>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
@@ -25,7 +41,7 @@ const Navbar = () => {
 
             <div className="flex items-center space-x-8">
               <button className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors flex items-center space-x-1.5">
-                <Sparkles className="w-4 h-4" />
+                {/* <Sparkles className="w-4 h-4" /> */}
                 <span>AI Picks</span>
               </button>
 
@@ -39,7 +55,7 @@ const Navbar = () => {
               </button>
 
               <button className="text-gray-600 hover:text-gray-900 transition-colors">
-                <User className="w-5 h-5" />
+                {/* <User className="w-5 h-5" /> */}
               </button>
             </div>
           </div>
@@ -48,6 +64,4 @@ const Navbar = () => {
       ;
     </div>
   );
-};
-
-export default Navbar;
+}
