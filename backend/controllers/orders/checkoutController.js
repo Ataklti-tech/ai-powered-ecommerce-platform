@@ -73,7 +73,7 @@ exports.validateCheckOut = catchAsync(async (req, res, next) => {
       isActive: true,
     });
 
-    if (coupon && new Date() < coupon.expiryDate) {
+    if (coupon && new Date() < coupon.validUntil) {
       if (coupon.discountType === "percentage") {
         couponDiscount = (total * coupon.discountValue) / 100;
       } else {
@@ -164,7 +164,7 @@ exports.confirmCheckOut = catchAsync(async (req, res, next) => {
       isActive: true,
     });
 
-    if (coupon && new Date() < coupon.expiryDate) {
+    if (coupon && new Date() < coupon.validUntil) {
       if (coupon.discountType === "percentage") {
         couponDiscountAmount = (total * coupon.discountValue) / 100;
       } else {
@@ -315,7 +315,7 @@ exports.applyCoupon = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid coupon code", 400));
   }
 
-  if (new Date() > coupon.expiryDate) {
+  if (new Date() > coupon.validUntil) {
     return next(new AppError("Coupon has expired", 400));
   }
 
