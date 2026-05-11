@@ -1,12 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const authController = require("./../../controllers/auth/authController");
+const authController = require('./../../controllers/auth/authController');
 
 const {
   protect,
   restrictTo,
   isNotAuthenticatedUser,
-} = require("./../../middleware/auth/authenticate");
+} = require('./../../middleware/auth/authenticate');
+const userController = require('./../../controllers/auth/userController');
 
 // register / sign up
 // POST /api/v1/auth/register
@@ -24,7 +25,7 @@ const {
 // - Email format validation
 // Response: User created, JWT token returned
 
-router.post("/register", isNotAuthenticatedUser, authController.signup);
+router.post('/register', isNotAuthenticatedUser, authController.signup);
 
 // login / sign in
 // POST /api/v1/auth/login
@@ -38,7 +39,7 @@ router.post("/register", isNotAuthenticatedUser, authController.signup);
 // - Password must be correct
 // Response: JWT token + Refresh token + User info
 // router.post("/login", isNotAuthenticatedUser, authController.login);
-router.post("/login", authController.login);
+router.post('/login', authController.login);
 // forgot password
 // POST /api/v1/auth/forgot-password
 // Request password reset email
@@ -51,7 +52,7 @@ router.post("/login", authController.login);
 // - User clicks link to reset password
 // Response: { success, message: "Email sent" }
 router.post(
-  "/forgot-password",
+  '/forgot-password',
   isNotAuthenticatedUser,
   authController.forgotPassword
 );
@@ -71,7 +72,7 @@ router.post(
 // Response: { success, message: "Password reset" }
 
 router.patch(
-  "/reset-password/:token",
+  '/reset-password/:token',
   isNotAuthenticatedUser,
   authController.resetPassword
 );
@@ -105,5 +106,19 @@ router.patch(
 // Admin routes
 // Get All Sessions (GET /api/v1/auth/admin/sessions - Admin views all active user sessions)
 // revoke user session -(Admin force logout a user)
+
+// Create admin user (protected by ADMIN_SETUP_SECRET, no existing admin required)
+// POST /api/v1/auth/create-admin
+// Body: { firstName, lastName, email, password, passwordConfirm, adminSecret }
+router.post('/create-admin', authController.createAdmin);
+
+// Logout user
+router.post('/logout', protect, authController.logout);
+
+// Get current user profile
+router.get('/me', protect, authController.getMe);
+
+// Update current user profile (name, phone)
+router.patch('/me', protect, userController.updateUserProfile);
 
 module.exports = router;
