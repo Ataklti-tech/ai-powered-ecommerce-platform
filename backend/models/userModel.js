@@ -1,33 +1,33 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
+const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
-const crypto = require("crypto");
+const crypto = require('crypto');
 
 const userSchema = mongoose.Schema({
   firstName: {
     type: String,
-    required: [true, "name is required"],
+    required: [true, 'name is required'],
   },
   lastName: {
     type: String,
-    required: [true, "last name is required"],
+    required: [true, 'last name is required'],
   },
   email: {
     type: String,
-    required: [true, "Email is required"],
+    required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
     trim: true,
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      "Please provide a valid email",
+      'Please provide a valid email',
     ],
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
-    minlength: [8, "Password must be at least 8 characters"],
+    required: [true, 'Password is required'],
+    minlength: [8, 'Password must be at least 8 characters'],
     select: false,
   },
   passwordConfirm: {
@@ -40,7 +40,7 @@ const userSchema = mongoose.Schema({
       validator: function (ps) {
         return ps === this.password;
       },
-      message: "Passwords do not match",
+      message: 'Passwords do not match',
     },
   },
   passwordChangedAt: {
@@ -63,11 +63,17 @@ const userSchema = mongoose.Schema({
   },
   profileImage: {
     type: String,
-    default: "",
+    default: '',
   },
   gender: {
     type: String,
-    enum: ["male", "female", "other", "prefer_not_to_say"],
+    enum: ['male', 'female', 'other', 'prefer_not_to_say'],
+  },
+
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
   },
 
   // Address (Embedded)
@@ -75,7 +81,7 @@ const userSchema = mongoose.Schema({
     {
       label: {
         type: String,
-        enum: ["home", "work", "other"],
+        enum: ['home', 'work', 'other'],
       },
       street: String,
       city: String,
@@ -83,7 +89,7 @@ const userSchema = mongoose.Schema({
       zipCode: String,
       country: {
         type: String,
-        default: "Uganda",
+        default: 'Uganda',
       },
       isDefault: {
         type: String,
@@ -94,9 +100,9 @@ const userSchema = mongoose.Schema({
 });
 
 // Middlewares
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
   // Only run this function if password was actually modified
-  if (!this.isModified("password")) return next();
+  if (!this.isModified('password')) return next();
 
   // Hash the password with cost of 12
   this.password = await bcrypt.hash(this.password, 12);
@@ -106,8 +112,8 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.pre("save", function (next) {
-  if (!this.isModified("password") || this.isNew) return next();
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
@@ -139,19 +145,19 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 };
 
 userSchema.methods.createPasswordResetToken = async function () {
-  const resetToken = crypto.randomBytes(32).toString("hex");
+  const resetToken = crypto.randomBytes(32).toString('hex');
 
   // const resetToken = buffer.toString("hex");
   this.passwordResetToken = crypto
-    .createHash("sha256")
+    .createHash('sha256')
     .update(resetToken)
-    .digest("hex");
+    .digest('hex');
   console.log({ resetToken });
 
   this.passwordResetExpires = Date.now() + 30 * 60 * 1000;
   return resetToken;
 };
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;
