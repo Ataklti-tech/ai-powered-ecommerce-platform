@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Commerce System Diagrams</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a2e; }
+
+    header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 20px 40px; }
+    header h1 { font-size: 22px; font-weight: 600; color: #111827; }
+    header p { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+    .tabs {
+      display: flex; gap: 2px; background: #fff;
+      border-bottom: 1px solid #e5e7eb; padding: 0 40px; overflow-x: auto;
+    }
+    .tab {
+      padding: 14px 20px; font-size: 13px; font-weight: 500; color: #6b7280;
+      cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+      transition: color .15s, border-color .15s;
+    }
+    .tab:hover { color: #374151; }
+    .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+    .panels { padding: 40px; max-width: 1400px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .diagram-card {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      padding: 40px; margin-bottom: 32px;
+    }
+    .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+    .card-head-text h2 { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 4px; }
+    .card-head-text p { font-size: 13px; color: #6b7280; }
+
+    .btn-export {
+      padding: 8px 18px; background: #2563eb; color: #fff; font-size: 12px;
+      font-weight: 600; border: none; border-radius: 6px; cursor: pointer;
+      white-space: nowrap; transition: background .15s;
+    }
+    .btn-export:hover { background: #1d4ed8; }
+
+    .mermaid { display: flex; justify-content: center; overflow-x: auto; padding: 8px 0; }
+
+    /* Data Dictionary */
+    .dd-section { margin-bottom: 36px; }
+    .dd-section h3 { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: #f3f4f6; }
+    th { padding: 10px 14px; text-align: left; font-weight: 600; color: #374151; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 9px 14px; border-bottom: 1px solid #f3f4f6; color: #374151; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .pk   { background: #dbeafe; color: #1d4ed8; }
+    .fk   { background: #ede9fe; color: #6d28d9; }
+    .req  { background: #d1fae5; color: #065f46; }
+    .opt  { background: #f3f4f6; color: #6b7280; }
+    .uniq { background: #fef3c7; color: #92400e; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>E-Commerce System — System Diagrams</h1>
+  <p>Context Diagram &middot; Use Case Diagram &middot; DFD Level 1 &middot; Class Diagram &middot; Data Dictionaries</p>
+</header>
+
+<nav class="tabs" id="tabNav">
+  <div class="tab active" data-panel="ctx">Context Diagram</div>
+  <div class="tab"        data-panel="uc">Use Case Diagram</div>
+  <div class="tab"        data-panel="dfd">Data Flow Diagram</div>
+  <div class="tab"        data-panel="cls">Class Diagram</div>
+  <div class="tab"        data-panel="dderd">DD — ERD</div>
+  <div class="tab"        data-panel="dddfd">DD — DFD</div>
+</nav>
+
+<div class="panels">
+
+  <!-- ═══ CONTEXT DIAGRAM ═══════════════════════════════════════════════════ -->
+  <div class="panel active" id="panel-ctx">
+    <div class="diagram-card">
+      <div class="card-head">
+        <div class="card-head-text">
+          <h2>Context Diagram (Level 0 DFD)</h2>
+          <p>System boundary and all external entities that interact with the e-commerce platform.</p>
+        </div>
+        <button class="btn-export" onclick="exportSVG('diag-ctx','context_diagram.svg')">Save as SVG</button>
+      </div>
+      <div class="mermaid" id="diag-ctx">
+flowchart LR
+    Customer["Customer"]
+    Admin["Admin"]
+    PG["Payment Gateway\nPesapal / MTN / Airtel\nStripe / PayPal"]
+    AI["AI Service\nFastAPI Recommender"]
+    ES["Email Service\nNodemailer / SMTP"]
+    CS["Cloud Storage\nCloudinary"]
+    SYS["E-Commerce Platform\nNode.js / Express / MongoDB"]
+
+    Customer -- "Browse, Order, Review" --> SYS
+    SYS -- "Products, Status, Recommendations" --> Customer
+    Admin -- "Manage Products, Orders, Users" --> SYS
+    SYS -- "Analytics, Reports, Alerts" --> Admin
+    SYS -- "Send transactional emails" --> ES
+    SYS -- "Upload product images" --> CS
+    CS -- "Secure image URLs" --> SYS
+    SYS -- "Payment request" --> PG
+    PG -- "Transaction result / Webhook" --> SYS
+    SYS -- "User behaviour data" --> AI
+    AI -- "Recommendation IDs" --> SYS
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ USE CASE DIAGRAM ══════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-uc">
+    <div class="diagram-card">
+      <div class="card-head">
+        <div class="card-head-text">
+          <h2>Use Case Diagram</h2>
+          <p>Actors and their interactions with the system, grouped by access level.</p>
+        </div>
+        <button class="btn-export" onclick="exportSVG('diag-uc','use_case_diagram.svg')">Save as SVG</button>
+      </div>
+      <div class="mermaid" id="diag-uc">
+flowchart LR
+    Guest["Guest\n[Actor]"]
+    User["Registered User\n[Actor]"]
+    Admin["Admin\n[Actor]"]
+    PGateway["Payment Gateway\n[Actor]"]
+
+    subgraph SYS["E-Commerce System"]
+        subgraph PublicUC["Public Access"]
+            UC1(["Browse Products"])
+            UC2(["Search and Filter"])
+            UC3(["View Product Detail"])
+            UC4(["Register / Login"])
+            UC5(["View Popular Products"])
+        end
+
+        subgraph AuthUC["Authenticated"]
+            UC6(["Manage Cart"])
+            UC7(["Place Order"])
+            UC8(["Track Order"])
+            UC9(["Write Review"])
+            UC10(["Manage Wishlist"])
+            UC11(["Update Profile and Address"])
+            UC12(["View AI Recommendations"])
+            UC13(["Reset Password"])
+        end
+
+        subgraph PayUC["Payment"]
+            UC14(["Select Payment Method"])
+            UC15(["Process Payment"])
+            UC16(["Handle Payment Callback"])
+        end
+
+        subgraph AdminUC["Admin"]
+            UC17(["Manage Products and Categories"])
+            UC18(["Manage Orders"])
+            UC19(["View Analytics Dashboard"])
+            UC20(["Manage Users"])
+            UC21(["Manage Coupons"])
+        end
+    end
+
+    Guest --> UC1
+    Guest --> UC2
+    Guest --> UC3
+    Guest --> UC4
+    Guest --> UC5
+
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC6
+    User --> UC7
+    User --> UC8
+    User --> UC9
+    User --> UC10
+    User --> UC11
+    User --> UC12
+    User --> UC13
+    User --> UC14
+
+    UC14 --> UC15
+    UC15 --> UC16
+    PGateway --> UC16
+
+    Admin --> UC17
+    Admin --> UC18
+    Admin --> UC19
+    Admin --> UC20
+    Admin --> UC21
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DFD LEVEL 1 ═══════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-dfd">
+    <div class="diagram-card">
+      <div class="card-head">
+        <div class="card-head-text">
+          <h2>Data Flow Diagram — Level 1</h2>
+          <p>Seven processes, eight data stores, and four external entities with named data flows.</p>
+        </div>
+        <button class="btn-export" onclick="exportSVG('diag-dfd','dfd_level1.svg')">Save as SVG</button>
+      </div>
+      <div class="mermaid" id="diag-dfd">
+flowchart TD
+    C["Customer"]
+    A["Admin"]
+    PG["Payment Gateway"]
+    AI["AI Service"]
+
+    P1["P1\nUser Authentication"]
+    P2["P2\nProduct Management"]
+    P3["P3\nOrder Processing"]
+    P4["P4\nPayment Processing"]
+    P5["P5\nRecommendation Engine"]
+    P6["P6\nReview and Wishlist"]
+    P7["P7\nActivity Tracking"]
+
+    D1[("D1\nUsers")]
+    D2[("D2\nProducts")]
+    D3[("D3\nOrders")]
+    D4[("D4\nPayments")]
+    D5[("D5\nCart")]
+    D6[("D6\nReviews")]
+    D7[("D7\nWishlist")]
+    D8[("D8\nUserActivity")]
+
+    C -- "Credentials / Registration" --> P1
+    P1 -- "Auth token / Profile" --> C
+    P1 -- "Read / Write user record" --> D1
+
+    A -- "Product data, Category updates" --> P2
+    P2 -- "Read / Write product" --> D2
+
+    C -- "Cart + Checkout request" --> P3
+    P3 -- "Order confirmation" --> C
+    P3 -- "Read cart" --> D5
+    P3 -- "Write order" --> D3
+    D2 -- "Check stock" --> P3
+
+    P3 -- "Payment intent" --> P4
+    P4 -- "Payment request" --> PG
+    PG -- "Webhook result" --> P4
+    P4 -- "Write payment record" --> D4
+    P4 -- "Update order status" --> D3
+
+    C -- "Page views, clicks" --> P7
+    P7 -- "Write activity log" --> D8
+    P7 -- "Behaviour data" --> AI
+    AI -- "Recommendation IDs" --> P5
+    P5 -- "Ranked products" --> C
+    D2 -- "Product details" --> P5
+
+    C -- "Review or Wishlist action" --> P6
+    P6 -- "Write review" --> D6
+    P6 -- "Write wishlist" --> D7
+    D2 -- "Product ref" --> P6
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CLASS DIAGRAM ════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-cls">
+    <div class="diagram-card">
+      <div class="card-head">
+        <div class="card-head-text">
+          <h2>Class Diagram</h2>
+          <p>Domain model: entities, key attributes, methods, and relationships.</p>
+        </div>
+        <button class="btn-export" onclick="exportSVG('diag-cls','class_diagram.svg')">Save as SVG</button>
+      </div>
+      <div class="mermaid" id="diag-cls">
+classDiagram
+    class User {
+        +ObjectId id
+        +String name
+        +String email
+        +String password
+        +String role
+        +Boolean isVerified
+        +Array addresses
+        +comparePassword(candidate) bool
+        +generatePasswordReset() String
+    }
+    class Product {
+        +ObjectId id
+        +String name
+        +String slug
+        +Number price
+        +Number comparePrice
+        +Number stock
+        +String status
+        +ObjectId category
+        +Array images
+        +Number averageRating
+        +Number reviewCount
+        +getTrending(limit) Product[]
+        +getFeatured(limit) Product[]
+        +getRelated(id, limit) Product[]
+    }
+    class Category {
+        +ObjectId id
+        +String name
+        +String slug
+        +String description
+        +ObjectId parent
+    }
+    class Order {
+        +ObjectId id
+        +ObjectId user
+        +Array items
+        +Object shippingAddress
+        +String status
+        +String paymentMethod
+        +String paymentStatus
+        +Number subtotal
+        +Number discount
+        +Number total
+        +String couponCode
+    }
+    class Cart {
+        +ObjectId id
+        +ObjectId user
+        +Array items
+        +Number total
+        +String couponCode
+        +Number discount
+    }
+    class Payment {
+        +ObjectId id
+        +ObjectId order
+        +ObjectId user
+        +String method
+        +String gateway
+        +String status
+        +Number amount
+        +String currency
+        +String transactionId
+        +Mixed gatewayResponse
+    }
+    class Review {
+        +ObjectId id
+        +ObjectId user
+        +ObjectId product
+        +Number rating
+        +String title
+        +String body
+        +Boolean verifiedPurchase
+        +Date createdAt
+    }
+    class Wishlist {
+        +ObjectId id
+        +ObjectId user
+        +Array items
+    }
+    class UserActivity {
+        +ObjectId id
+        +ObjectId user
+        +ObjectId product
+        +String activityType
+        +Mixed metadata
+        +Date timestamp
+    }
+    class Coupon {
+        +ObjectId id
+        +String code
+        +String discountType
+        +Number discountValue
+        +Number minOrderAmount
+        +Number usageLimit
+        +Boolean isActive
+        +Date expiresAt
+        +isValid() bool
+    }
+
+    User "1" --> "0..*" Order : places
+    User "1" --> "1" Cart : has
+    User "1" --> "0..*" Review : writes
+    User "1" --> "1" Wishlist : owns
+    User "1" --> "0..*" UserActivity : generates
+    Order "1" --> "1" Payment : has
+    Order "0..*" --> "1..*" Product : contains
+    Cart "0..*" --> "0..*" Product : holds
+    Wishlist "0..*" --> "0..*" Product : saves
+    Review "0..*" --> "1" Product : rates
+    Product "0..*" --> "1" Category : belongs to
+    Category "0..*" --> "0..1" Category : parent of
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DATA DICTIONARY — ERD ════════════════════════════════════════════ -->
+  <div class="panel" id="panel-dderd">
+    <div class="diagram-card">
+      <h2 style="margin-bottom:6px">Data Dictionary — ERD</h2>
+      <p class="desc" style="font-size:13px;color:#6b7280;margin-bottom:28px">Field-level definitions for every entity in the data model.</p>
+
+      <div class="dd-section">
+        <h3>User</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated MongoDB document ID</td></tr>
+          <tr><td>name</td><td>String</td><td><span class="badge req">Required</span></td><td>Full display name</td></tr>
+          <tr><td>email</td><td>String</td><td><span class="badge req">Required</span> <span class="badge uniq">Unique</span></td><td>Login email address</td></tr>
+          <tr><td>password</td><td>String</td><td><span class="badge req">Required</span></td><td>bcrypt-hashed password</td></tr>
+          <tr><td>role</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: user | admin</td></tr>
+          <tr><td>isVerified</td><td>Boolean</td><td><span class="badge opt">Optional</span></td><td>Email verification flag</td></tr>
+          <tr><td>addresses</td><td>Array</td><td><span class="badge opt">Optional</span></td><td>Embedded shipping addresses {street, city, country, isDefault}</td></tr>
+          <tr><td>passwordResetToken</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Hashed token for password reset</td></tr>
+          <tr><td>passwordResetExpires</td><td>Date</td><td><span class="badge opt">Optional</span></td><td>Expiry timestamp for reset token</td></tr>
+          <tr><td>createdAt</td><td>Date</td><td><span class="badge req">Required</span></td><td>Account creation timestamp (auto)</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Product</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>name</td><td>String</td><td><span class="badge req">Required</span></td><td>Product display name</td></tr>
+          <tr><td>slug</td><td>String</td><td><span class="badge uniq">Unique</span></td><td>URL-friendly identifier</td></tr>
+          <tr><td>description</td><td>String</td><td><span class="badge req">Required</span></td><td>Full product description</td></tr>
+          <tr><td>shortDescription</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Brief card-level summary</td></tr>
+          <tr><td>price</td><td>Number</td><td><span class="badge req">Required</span></td><td>Selling price</td></tr>
+          <tr><td>comparePrice</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Original/crossed-out price</td></tr>
+          <tr><td>stock</td><td>Number</td><td><span class="badge req">Required</span></td><td>Available inventory count</td></tr>
+          <tr><td>status</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: active | inactive | draft</td></tr>
+          <tr><td>category</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; Category</span></td><td>Primary product category</td></tr>
+          <tr><td>images</td><td>Array</td><td><span class="badge req">Required</span></td><td>Cloudinary objects {url, publicId}</td></tr>
+          <tr><td>averageRating</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Computed average (0–5), updated on review</td></tr>
+          <tr><td>reviewCount</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Total review count</td></tr>
+          <tr><td>tags</td><td>Array&lt;String&gt;</td><td><span class="badge opt">Optional</span></td><td>Search / filter tags</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Category</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>name</td><td>String</td><td><span class="badge req">Required</span> <span class="badge uniq">Unique</span></td><td>Category display name</td></tr>
+          <tr><td>slug</td><td>String</td><td><span class="badge uniq">Unique</span></td><td>URL-friendly identifier</td></tr>
+          <tr><td>description</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Category description</td></tr>
+          <tr><td>image</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Banner or icon URL</td></tr>
+          <tr><td>parent</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; Category</span> <span class="badge opt">Optional</span></td><td>Parent category for hierarchy</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Order</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>user</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; User</span> <span class="badge req">Required</span></td><td>Ordering customer</td></tr>
+          <tr><td>orderNumber</td><td>String</td><td><span class="badge uniq">Unique</span></td><td>Human-readable order reference</td></tr>
+          <tr><td>items</td><td>Array</td><td><span class="badge req">Required</span></td><td>Line items: {product, name, price, qty, image}</td></tr>
+          <tr><td>shippingAddress</td><td>Object</td><td><span class="badge req">Required</span></td><td>Address snapshot at order time</td></tr>
+          <tr><td>status</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: pending | confirmed | processing | shipped | delivered | cancelled | refunded</td></tr>
+          <tr><td>paymentMethod</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: card | mtn_momo | airtel | pesapal | paypal | stripe</td></tr>
+          <tr><td>paymentStatus</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: pending | paid | failed | refunded</td></tr>
+          <tr><td>subtotal</td><td>Number</td><td><span class="badge req">Required</span></td><td>Items total before discount</td></tr>
+          <tr><td>discount</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Coupon discount applied</td></tr>
+          <tr><td>shippingCost</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Shipping fee</td></tr>
+          <tr><td>total</td><td>Number</td><td><span class="badge req">Required</span></td><td>Final charged amount</td></tr>
+          <tr><td>couponCode</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Applied coupon code</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Cart</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>user</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; User</span> <span class="badge uniq">Unique</span></td><td>Cart owner (one cart per user)</td></tr>
+          <tr><td>items</td><td>Array</td><td><span class="badge opt">Optional</span></td><td>Line items: {product, name, price, qty, image}</td></tr>
+          <tr><td>total</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Computed sum of item prices</td></tr>
+          <tr><td>couponCode</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Applied coupon code</td></tr>
+          <tr><td>discount</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Discount from applied coupon</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Payment</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>order</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; Order</span> <span class="badge req">Required</span></td><td>Associated order</td></tr>
+          <tr><td>user</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; User</span> <span class="badge req">Required</span></td><td>Payer</td></tr>
+          <tr><td>method</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: stripe | paypal | mtn_momo | airtel | pesapal</td></tr>
+          <tr><td>gateway</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Actual gateway used (e.g. pesapal aggregating MTN)</td></tr>
+          <tr><td>status</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: pending | processing | completed | failed | refunded</td></tr>
+          <tr><td>amount</td><td>Number</td><td><span class="badge req">Required</span></td><td>Charged amount</td></tr>
+          <tr><td>currency</td><td>String</td><td><span class="badge req">Required</span></td><td>ISO 4217 currency code (UGX, USD, etc.)</td></tr>
+          <tr><td>transactionId</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Gateway-issued transaction reference</td></tr>
+          <tr><td>gatewayResponse</td><td>Mixed</td><td><span class="badge opt">Optional</span></td><td>Raw webhook / callback payload</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Review</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>user</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; User</span> <span class="badge req">Required</span></td><td>Review author</td></tr>
+          <tr><td>product</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; Product</span> <span class="badge req">Required</span></td><td>Reviewed product</td></tr>
+          <tr><td>rating</td><td>Number</td><td><span class="badge req">Required</span></td><td>Star rating 1–5</td></tr>
+          <tr><td>title</td><td>String</td><td><span class="badge opt">Optional</span></td><td>Review headline</td></tr>
+          <tr><td>body</td><td>String</td><td><span class="badge req">Required</span></td><td>Review text content</td></tr>
+          <tr><td>verifiedPurchase</td><td>Boolean</td><td><span class="badge opt">Optional</span></td><td>True if reviewer has a completed order for this product</td></tr>
+          <tr><td>createdAt</td><td>Date</td><td><span class="badge req">Required</span></td><td>Submission timestamp (auto)</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Wishlist</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>user</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; User</span> <span class="badge uniq">Unique</span></td><td>Wishlist owner (one per user)</td></tr>
+          <tr><td>items</td><td>Array</td><td><span class="badge opt">Optional</span></td><td>Saved products: {product, addedAt}</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>UserActivity</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>user</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; User</span> <span class="badge req">Required</span></td><td>Acting user</td></tr>
+          <tr><td>product</td><td>ObjectId</td><td><span class="badge fk">FK &rarr; Product</span> <span class="badge opt">Optional</span></td><td>Product involved in the activity</td></tr>
+          <tr><td>activityType</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: view | search | cart_add | cart_remove | wishlist_add | purchase | review | rec_impression | similar_impression</td></tr>
+          <tr><td>metadata</td><td>Mixed</td><td><span class="badge opt">Optional</span></td><td>Free-form context (search query, referrer, etc.)</td></tr>
+          <tr><td>timestamp</td><td>Date</td><td><span class="badge req">Required</span></td><td>Event time (indexed for analytics queries)</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Coupon</h3>
+        <table><thead><tr><th>Field</th><th>Type</th><th>Constraint</th><th>Description</th></tr></thead><tbody>
+          <tr><td>_id</td><td>ObjectId</td><td><span class="badge pk">PK</span></td><td>Auto-generated document ID</td></tr>
+          <tr><td>code</td><td>String</td><td><span class="badge req">Required</span> <span class="badge uniq">Unique</span></td><td>Coupon code (e.g. SAVE20)</td></tr>
+          <tr><td>discountType</td><td>String</td><td><span class="badge req">Required</span></td><td>Enum: percentage | fixed</td></tr>
+          <tr><td>discountValue</td><td>Number</td><td><span class="badge req">Required</span></td><td>Discount amount or percentage</td></tr>
+          <tr><td>minOrderAmount</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Minimum cart value for coupon to apply</td></tr>
+          <tr><td>usageLimit</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Maximum total redemptions allowed</td></tr>
+          <tr><td>usageCount</td><td>Number</td><td><span class="badge opt">Optional</span></td><td>Current redemption count</td></tr>
+          <tr><td>isActive</td><td>Boolean</td><td><span class="badge req">Required</span></td><td>Whether coupon is enabled</td></tr>
+          <tr><td>expiresAt</td><td>Date</td><td><span class="badge opt">Optional</span></td><td>Coupon expiry date</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DATA DICTIONARY — DFD ════════════════════════════════════════════ -->
+  <div class="panel" id="panel-dddfd">
+    <div class="diagram-card">
+      <h2 style="margin-bottom:6px">Data Dictionary — DFD</h2>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:28px">Definitions for external entities, processes, data stores, and data flows.</p>
+
+      <div class="dd-section">
+        <h3>External Entities</h3>
+        <table><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Inputs to System</th><th>Outputs from System</th></tr></thead><tbody>
+          <tr><td>E1</td><td>Customer</td><td>End user browsing, purchasing, and reviewing products</td><td>Credentials, checkout data, reviews, activity events</td><td>Products, order status, recommendations</td></tr>
+          <tr><td>E2</td><td>Admin</td><td>Staff managing inventory, orders, and platform configuration</td><td>Product data, category updates, order status changes</td><td>Analytics reports, dashboard metrics</td></tr>
+          <tr><td>E3</td><td>Payment Gateway</td><td>External processors: Pesapal, MTN MoMo, Airtel, Stripe, PayPal</td><td>Transaction result, IPN / webhook callback</td><td>Payment initiation request</td></tr>
+          <tr><td>E4</td><td>AI Service</td><td>FastAPI microservice hosting recommendation models</td><td>Recommendation IDs, similarity scores</td><td>User behaviour data, product ID lists</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Processes</h3>
+        <table><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Key Inputs</th><th>Key Outputs</th></tr></thead><tbody>
+          <tr><td>P1</td><td>User Authentication</td><td>Register, login, JWT issuance, password reset, email verification</td><td>Credentials, reset token</td><td>JWT token, user profile</td></tr>
+          <tr><td>P2</td><td>Product Management</td><td>CRUD for products and categories; image upload to Cloudinary; stock management</td><td>Product data, image files</td><td>Product catalogue, image URLs</td></tr>
+          <tr><td>P3</td><td>Order Processing</td><td>Cart validation, stock reservation, order creation, status transitions</td><td>Cart, shipping address, coupon</td><td>Order confirmation, payment intent</td></tr>
+          <tr><td>P4</td><td>Payment Processing</td><td>Initiate gateway payment, handle webhooks, update order and payment status</td><td>Payment request, gateway webhook</td><td>Redirect URL, payment record</td></tr>
+          <tr><td>P5</td><td>Recommendation Engine</td><td>Fetch personalised or trending recommendations; fallback to DB trending query</td><td>User ID, AI rec IDs</td><td>Ranked product list to customer</td></tr>
+          <tr><td>P6</td><td>Review and Wishlist</td><td>Create/update/delete reviews; add/remove wishlist items; update product rating aggregates</td><td>Review data, wishlist action</td><td>Updated review, updated product rating</td></tr>
+          <tr><td>P7</td><td>Activity Tracking</td><td>Log user events for analytics and AI training data</td><td>Event type, product ID, metadata</td><td>Activity log entry, aggregated behaviour</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Data Stores</h3>
+        <table><thead><tr><th>ID</th><th>Name</th><th>Technology</th><th>Description</th><th>Key Fields</th></tr></thead><tbody>
+          <tr><td>D1</td><td>Users</td><td>MongoDB</td><td>All registered user accounts including credentials and addresses</td><td>_id, email, password (hashed), role, addresses</td></tr>
+          <tr><td>D2</td><td>Products</td><td>MongoDB</td><td>Product catalogue with pricing, stock, and media</td><td>_id, name, price, stock, status, category, images</td></tr>
+          <tr><td>D3</td><td>Orders</td><td>MongoDB</td><td>Customer orders from placement through fulfilment</td><td>_id, user, items, status, paymentStatus, total</td></tr>
+          <tr><td>D4</td><td>Payments</td><td>MongoDB</td><td>Payment transaction records from all gateways</td><td>_id, order, method, status, transactionId, amount</td></tr>
+          <tr><td>D5</td><td>Cart</td><td>MongoDB</td><td>Active shopping carts (one per user, persisted)</td><td>_id, user, items, total, couponCode</td></tr>
+          <tr><td>D6</td><td>Reviews</td><td>MongoDB</td><td>Customer reviews and star ratings for products</td><td>_id, user, product, rating, body, verifiedPurchase</td></tr>
+          <tr><td>D7</td><td>Wishlist</td><td>MongoDB</td><td>Saved products per user (one wishlist per user)</td><td>_id, user, items[product, addedAt]</td></tr>
+          <tr><td>D8</td><td>UserActivity</td><td>MongoDB</td><td>Behavioural event log for analytics and AI training</td><td>_id, user, product, activityType, metadata, timestamp</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="dd-section">
+        <h3>Data Flows</h3>
+        <table><thead><tr><th>Flow</th><th>From</th><th>To</th><th>Data</th><th>Description</th></tr></thead><tbody>
+          <tr><td>F1</td><td>Customer</td><td>P1 Auth</td><td>Email, password or registration form</td><td>User submits login or registration</td></tr>
+          <tr><td>F2</td><td>P1 Auth</td><td>Customer</td><td>JWT token, user profile</td><td>System returns auth token on success</td></tr>
+          <tr><td>F3</td><td>P1 Auth</td><td>D1 Users</td><td>User record</td><td>Create or update user document</td></tr>
+          <tr><td>F4</td><td>Admin</td><td>P2 Products</td><td>Product / category data, image files</td><td>Admin creates or updates product listings</td></tr>
+          <tr><td>F5</td><td>P2 Products</td><td>D2 Products</td><td>Product document with Cloudinary URLs</td><td>Persist product data</td></tr>
+          <tr><td>F6</td><td>Customer</td><td>P3 Orders</td><td>Cart ID, shipping address, coupon code</td><td>Customer checks out</td></tr>
+          <tr><td>F7</td><td>P3 Orders</td><td>D3 Orders</td><td>Order document</td><td>New order written with pending status</td></tr>
+          <tr><td>F8</td><td>P3 Orders</td><td>P4 Payment</td><td>Order ID, amount, payment method</td><td>Order triggers payment initiation</td></tr>
+          <tr><td>F9</td><td>P4 Payment</td><td>Payment Gateway</td><td>Payment request (amount, reference, redirect URLs)</td><td>System sends payment intent to gateway</td></tr>
+          <tr><td>F10</td><td>Payment Gateway</td><td>P4 Payment</td><td>IPN / webhook: status, transaction ID</td><td>Gateway notifies system of payment outcome</td></tr>
+          <tr><td>F11</td><td>P4 Payment</td><td>D4 Payments</td><td>Payment record</td><td>Write final payment status and gateway response</td></tr>
+          <tr><td>F12</td><td>P4 Payment</td><td>D3 Orders</td><td>Updated paymentStatus and order status</td><td>Order updated after payment confirmation</td></tr>
+          <tr><td>F13</td><td>Customer</td><td>P7 Tracking</td><td>Event type, product ID, metadata</td><td>User interaction events sent to tracker</td></tr>
+          <tr><td>F14</td><td>P7 Tracking</td><td>D8 UserActivity</td><td>Activity log entry</td><td>Persist raw behaviour event</td></tr>
+          <tr><td>F15</td><td>P7 Tracking</td><td>AI Service</td><td>Aggregated behaviour data</td><td>Behaviour summary sent to AI for model use</td></tr>
+          <tr><td>F16</td><td>AI Service</td><td>P5 Recommendations</td><td>Ranked product ID list</td><td>AI returns recommendation results</td></tr>
+          <tr><td>F17</td><td>P5 Recommendations</td><td>Customer</td><td>Enriched product list</td><td>Personalised or trending products displayed</td></tr>
+          <tr><td>F18</td><td>Customer</td><td>P6 Review / Wishlist</td><td>Review data or wishlist action</td><td>User submits review or saves product</td></tr>
+          <tr><td>F19</td><td>P6 Review / Wishlist</td><td>D6 Reviews / D7 Wishlist</td><td>Review or wishlist document</td><td>Persist review or wishlist update</td></tr>
+          <tr><td>F20</td><td>P6 Review / Wishlist</td><td>D2 Products</td><td>Updated averageRating, reviewCount</td><td>Product aggregate stats recalculated</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: { curve: 'basis', useMaxWidth: false },
+    classDiagram: { useMaxWidth: false },
+  });
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // SVG export
+  function exportSVG(containerId, filename) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var svgEl = container.querySelector('svg');
+    if (!svgEl) {
+      alert('Diagram not yet rendered. Please wait a moment and try again.');
+      return;
+    }
+    var clone = svgEl.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+
+    // Inline background
+    var style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = 'svg { background: #ffffff; }';
+    clone.insertBefore(style, clone.firstChild);
+
+    var serializer = new XMLSerializer();
+    var source = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(clone);
+    var blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>
