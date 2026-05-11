@@ -1,40 +1,51 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const userController = require("./../../controllers/auth/userController");
-const authController = require("./../../controllers/auth/authController");
-const { protect, restrictTo } = require("./../../middleware/auth/authenticate");
-// Creating user
-router.post("/signup", userController.createUser);
+const userController = require('./../../controllers/auth/userController');
+const { protect, restrictTo } = require('./../../middleware/auth/authenticate');
 
-// Protected routes
-// Get current logged in user
-router.get("/profile", protect, userController.getCurrentUser);
+// ─── Public ──────────────────────────────────────────────────────────────────
+// Signup (creates a regular user; use /api/v1/auth/create-admin for admins)
+router.post('/signup', userController.createUser);
 
-// Admin only routes
-// Get all users
-router.get("/", protect, userController.getAllUsers);
-// router.get("/", userController.getAllUsers);
-
-// Get single user by id
-router.get("/:id", protect, userController.getUser);
-
-// Get user by email
-router.get("/email/:email", userController.getUserByEmail);
+// Get user by email (used internally / for lookups)
+router.get('/email/:email', userController.getUserByEmail);
 
 // Search users
-router.get("/search/:search", userController.searchUsers);
+router.get('/search', userController.searchUsers);
 
-// Update user data
-router.put("/:id", userController.updateUserData);
+// ─── Authenticated ────────────────────────────────────────────────────────────
+router.get('/profile', protect, userController.getCurrentUser);
+
+// ─── Admin only ───────────────────────────────────────────────────────────────
+// These must be declared before /:id so Express doesn't swallow them
+router.get(
+  '/admin/statistics',
+  protect,
+  restrictTo('admin'),
+  userController.getUserStatistics
+);
+
+// Get all users
+router.get('/', protect, restrictTo('admin'), userController.getAllUsers);
+
+// Get single user by id
+router.get('/:id', protect, userController.getUser);
+
+// Update user data (admin can update role; user can update own profile fields)
+router.put('/:id', protect, userController.updateUserData);
 
 // Toggle user role (admin only)
-router.put("./:id/toggle-role", userController.toggleUserRole);
+router.put(
+  '/:id/toggle-role',
+  protect,
+  restrictTo('admin'),
+  userController.toggleUserRole
+);
 
-// Get user statistics
-router.get("/admin/statistics", userController.getUserStatistics);
-
-//
-
-// router.route().get();
+// ─── Address routes ───────────────────────────────────────────────────────────
+router.get('/addresses', protect, userController.getUserAddresses);
+router.post('/addresses', protect, userController.updateUserAddress);
+router.put('/addresses/:addressId', protect, userController.updateSpecificAddress);
+router.delete('/addresses/:addressId', protect, userController.deleteUserAddress);
 
 module.exports = router;
