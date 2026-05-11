@@ -1,6 +1,6 @@
-# PickPerfect- AI-Powered E-Commerce Application
+# Agelgil - AI-Powered E-Commerce Application
 
-PickPerfect is an intelligent e-commerce platform that leverages machine learning to provide personalized product recommendations. By analyzing user behavior and preferences, our system delivers tailored shopping experiences that increase engagement and conversion rates.
+Agelgil is an intelligent e-commerce platform that leverages machine learning to provide personalized product recommendations. By analyzing user behavior and preferences, our system delivers tailored shopping experiences that increase engagement and conversion rates.
 
 This repository contains the full MERN stack application with integrated AI recommendation engine, including the React frontend, Node.js/Express backend, and FastAPI machine learning service.
 
