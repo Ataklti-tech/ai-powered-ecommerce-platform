@@ -24,11 +24,11 @@ export default function Features() {
   ];
 
   return (
-    <section className="py-24 px-8 bg-white">
+    <section id="how-it-works" className="py-24 px-8 bg-white">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="mb-16 text-center">
-          <h2 className="text-5xl font-bold text-gray-900 mb-4">Why PickPerfect?</h2>
+          <h2 className="text-5xl font-bold text-gray-900 mb-4">Why Agelgil?</h2>
           <p className="text-xl text-gray-600">Experience shopping reimagined with AI</p>
         </div>
 
