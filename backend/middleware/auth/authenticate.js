@@ -56,22 +56,15 @@ exports.restrictTo = (...roles) => {
 };
 
 exports.isNotAuthenticatedUser = (req, res, next) => {
-  let token;
-
-  if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
-  } else if (req.headers.authorization) {
-    const authHeader = req.headers.authorization;
-    if (authHeader.startsWith("Bearer")) {
-      token = authHeader.slice(7);
-    }
-  }
-
-  if (token) {
+  // Only block if a *valid* JWT cookie is present (set by our own login flow).
+  // We intentionally ignore the Authorization header here so that Postman
+  // clients that carry a Bearer token in their default headers are not blocked
+  // from reaching the register / forgot-password routes.
+  const jwtCookie = req.cookies && (req.cookies.jwt || req.cookies.token);
+  if (jwtCookie && jwtCookie !== 'loggedout') {
     return next(
       new AppError("You are already logged in. Please logout first.", 400)
     );
   }
-
   next();
 };
