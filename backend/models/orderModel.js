@@ -99,7 +99,7 @@ const orderSchema = mongoose.Schema(
       status: {
         type: String,
         enum: ["pending", "completed", "failed", "refunded"],
-        default: "completed",
+        default: "pending",
         index: true,
       },
       // Gateway details
@@ -132,8 +132,7 @@ const orderSchema = mongoose.Schema(
         "cancelled",
         "returned",
       ],
-      // default: "pending",
-      default: "delivered",
+      default: "pending",
     },
     statusHistory: [
       {
