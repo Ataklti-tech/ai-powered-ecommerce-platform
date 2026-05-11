@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const couponSchema = mongoose.Schema(
   {
     code: {
       type: String,
       trim: true,
-      required: [true, "Coupon name is required"],
+      required: [true, 'Coupon name is required'],
       unique: true,
       uppercase: true,
       minlength: 3,
@@ -13,16 +13,16 @@ const couponSchema = mongoose.Schema(
     },
     description: {
       type: String,
-      required: [true, "Coupon description is required"],
+      required: [true, 'Coupon description is required'],
     },
     discountType: {
       type: String,
-      enum: ["percentage", "fixed"],
-      required: [true, "Discount type is required"],
+      enum: ['percentage', 'fixed'],
+      required: [true, 'Discount type is required'],
     },
     discountValue: {
       type: Number,
-      required: [true, "Discount value is required"],
+      required: [true, 'Discount value is required'],
       min: 0,
     },
     minPurchaseAmount: {
@@ -36,11 +36,11 @@ const couponSchema = mongoose.Schema(
     },
     validFrom: {
       type: Date,
-      required: [true, "Valid from date is required"],
+      required: [true, 'Valid from date is required'],
     },
     validUntil: {
       type: Date,
-      required: [true, "Valid until date is required"],
+      required: [true, 'Valid until date is required'],
     },
     usageLimit: {
       type: Number,
@@ -57,19 +57,19 @@ const couponSchema = mongoose.Schema(
     applicableCategories: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
+        ref: 'Category',
       },
     ],
     applicableProducts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
       },
     ],
     excludedProducts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
       },
     ],
     isActive: {
@@ -78,7 +78,7 @@ const couponSchema = mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
   },
@@ -86,18 +86,18 @@ const couponSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-// Index for faster queries
-couponSchema.index({ code: 1 });
+// Index for faster queries (code is already indexed via unique: true)
+// couponSchema.index({ code: 1 }); // Removed - duplicate with unique: true
 couponSchema.index({ validFrom: 1, validUntil: 1 });
 couponSchema.index({ isActive: 1 });
 
 // Virtual to check if coupon is expired
-couponSchema.virtual("isExpired").get(function () {
+couponSchema.virtual('isExpired').get(function () {
   return new Date() > this.validUntil;
 });
 
 // Virtual to check if coupon is valid now
-couponSchema.virtual("isValidNow").get(function () {
+couponSchema.virtual('isValidNow').get(function () {
   const now = new Date();
   return now >= this.validFrom && now <= this.validUntil && this.isActive;
 });
@@ -116,7 +116,7 @@ couponSchema.methods.incrementUsage = async function () {
 
 // Method to calculate discount
 couponSchema.methods.calculateDiscount = function (amount) {
-  if (this.discountType === "percentage") {
+  if (this.discountType === 'percentage') {
     let discount = (amount * this.discountValue) / 100;
 
     // Apply max discount limit if set
@@ -131,5 +131,5 @@ couponSchema.methods.calculateDiscount = function (amount) {
   }
 };
 
-const Coupon = mongoose.model("Coupon", couponSchema);
+const Coupon = mongoose.model('Coupon', couponSchema);
 module.exports = Coupon;
