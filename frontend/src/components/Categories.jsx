@@ -368,13 +368,15 @@
 //   );
 // }
 
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -393,12 +395,12 @@ export default function Categories() {
 
         setCategories(Array.isArray(list) ? list : []);
       } catch (err) {
-        console.error("Failed to fetch categories:", err);
+        console.error('Failed to fetch categories:', err);
 
         if (err.response) {
           setError(`Server error: ${err.response.status}`);
         } else if (err.request) {
-          setError("No response from server");
+          setError('No response from server');
         } else {
           setError(err.message);
         }
@@ -409,6 +411,11 @@ export default function Categories() {
 
     fetchCategories();
   }, []);
+
+  // Navigate to category products page
+  const handleCategoryClick = (categoryName) => {
+    navigate(`/products?category=${encodeURIComponent(categoryName)}`);
+  };
 
   // ─────────────────────────────
   // Loading state
@@ -460,22 +467,16 @@ export default function Categories() {
 
         <div className="grid grid-cols-4 gap-6">
           {categories.map((category, index) => {
-            if (!category || typeof category !== "object") return null;
+            if (!category || typeof category !== 'object') return null;
 
-            const { _id, id, name = "Unnamed Category" } = category;
+            const { _id, id, name = 'Unnamed Category' } = category;
 
-            // Normalize count field
-            const count =
-              Number(
-                category.count ??
-                  category.productCount ??
-                  category.products_count ??
-                  0,
-              ) || 0;
+            const count = Number(category.productCount ?? category.count ?? 0);
 
             return (
               <button
                 key={_id || id || index}
+                onClick={() => handleCategoryClick(name)}
                 className="group relative bg-white border-2 border-gray-100 hover:border-orange-300 rounded-3xl p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 text-left overflow-hidden"
               >
                 {/* Hover background */}
