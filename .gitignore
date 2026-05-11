@@ -28,3 +28,19 @@ Thumbs.db
 # IDE files
 .vscode/
 .idea/
+
+# Large ML data files (exceed GitHub 100 MB limit)
+recommendation system/data/ratings_Electronics (1).csv
+recommendation system/data/ratings_Beauty.csv
+recommendation system/data/amazon.csv
+recommendation system/models/knnbaseline_recommender.pkl
+recommendation system/models/knnbaseline_exported.pkl
+
+# Python virtual environments
+recommender/models/env/
+recommender/models/venv/
+recommender/venv/
+.venv/
+
+# Large Jupyter notebooks with embedded outputs
+recommender/models/recommendation_system_improved.ipynb
