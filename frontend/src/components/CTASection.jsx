@@ -1,7 +1,19 @@
 import React from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function CTASection() {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => navigate("/register");
+
+  const handleLearnMore = () => {
+    const section = document.getElementById("how-it-works");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <section className="py-32 px-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
       {/* Background decorations */}
@@ -30,11 +42,17 @@ export default function CTASection() {
         </p>
 
         <div className="flex items-center justify-center space-x-4">
-          <button className="px-10 py-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-lg font-semibold rounded-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center space-x-2">
+          <button
+            onClick={handleGetStarted}
+            className="px-10 py-5 bg-linear-to-r from-orange-500 to-orange-600 text-white text-lg font-semibold rounded-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center space-x-2 cursor-pointer"
+          >
             <span>Get Started Free</span>
             <ArrowRight className="w-5 h-5" />
           </button>
-          <button className="px-10 py-5 bg-white/10 backdrop-blur-sm text-white text-lg font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 border border-white/20">
+          <button
+            onClick={handleLearnMore}
+            className="px-10 py-5 bg-white/10 backdrop-blur-sm text-white text-lg font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 border border-white/20 cursor-pointer"
+          >
             Learn More
           </button>
         </div>
