@@ -1,4 +1,3 @@
-const { LucideThumbsUp } = require("lucide-react");
 const mongoose = require("mongoose");
 const validator = require("validator");
 
