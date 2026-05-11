@@ -98,7 +98,7 @@ const Header = ({
         <div className="header__logo">
           <Link to="/" className="header__logo-link">
             <ShoppingCart className="header__logo-icon" />
-            <span className="header__logo-text">PickPerfect</span>
+            <span className="header__logo-text">Agelgil</span>
           </Link>
         </div>
 
