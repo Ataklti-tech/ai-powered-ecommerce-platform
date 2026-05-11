@@ -1,4 +1,5 @@
-import React from "react";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   Sparkles,
@@ -8,9 +9,20 @@ import {
   Search,
   Heart,
   Package,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function Hero() {
+  const navigate = useNavigate();
+
+  const handleStartShopping = () => navigate('/products');
+
+  const handleHowItWorks = () => {
+    const section = document.getElementById('how-it-works');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <section className="pt-32 pb-24 px-8 bg-gradient-to-b from-orange-50/30 to-white">
       <div className="max-w-[1400px] mx-auto">
@@ -39,12 +51,19 @@ export default function Hero() {
             </p>
 
             <div className="flex items-center space-x-4 mb-12">
-              <button className="px-8 py-4 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer">
+              <button
+                onClick={handleStartShopping}
+                className="px-8 py-4 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+              >
                 <span>Start Shopping</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <button className="px-8 py-4 text-gray-700 text-sm font-semibold hover:text-gray-900 transition-colors cursor-pointer">
-                How It Works
+              <button
+                onClick={handleHowItWorks}
+                className="px-8 py-4 text-gray-700 text-sm font-semibold hover:text-gray-900 transition-colors cursor-pointer flex items-center space-x-2"
+              >
+                <span>How It Works</span>
+                <ArrowRight className="w-4 h-4 opacity-50" />
               </button>
             </div>
 
@@ -74,11 +93,12 @@ export default function Hero() {
             <div className="grid grid-cols-2 gap-6">
               {/* Icon Card 1 */}
               <div className="group relative bg-white border-2 border-gray-100 rounded-3xl p-10 hover:border-orange-300 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-                {/* <div className="absolute top-6 right-6 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                {/* Original icon content
+                <div className="absolute top-6 right-6 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-orange-500" />
                 </div>
                 <div className="mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-20 h-20 bg-linear-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
                     <Zap className="w-10 h-10 text-white" />
                   </div>
                 </div>
@@ -87,16 +107,28 @@ export default function Hero() {
                 </h3>
                 <p className="text-sm text-gray-600">
                   AI finds your perfect products in seconds
-                </p> */}
+                </p>
+                */}
+                {/* Option F — Step 1 */}
+                <div className="text-7xl font-black text-gray-100 leading-none mb-6 select-none">
+                  01
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Browse
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Explore thousands of curated products across every category
+                </p>
               </div>
 
               {/* Icon Card 2 */}
               <div className="group relative bg-white border-2 border-gray-100 rounded-3xl p-10 hover:border-orange-300 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 mt-12">
-                {/* <div className="absolute top-6 right-6 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                {/* Original icon content
+                <div className="absolute top-6 right-6 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-blue-500" />
                 </div>
                 <div className="mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-20 h-20 bg-linear-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
                     <Search className="w-10 h-10 text-white" />
                   </div>
                 </div>
@@ -105,16 +137,29 @@ export default function Hero() {
                 </h3>
                 <p className="text-sm text-gray-600">
                   Discover exactly what you're looking for
-                </p> */}
+                </p>
+                */}
+                {/* Option F — Step 2 */}
+                <div className="text-7xl font-black text-gray-100 leading-none mb-6 select-none">
+                  02
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  AI Learns
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Our AI studies your clicks, saves, and preferences in real
+                  time
+                </p>
               </div>
 
               {/* Icon Card 3 */}
               <div className="group relative bg-white border-2 border-gray-100 rounded-3xl p-10 hover:border-orange-300 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-                {/* <div className="absolute top-6 right-6 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                {/* Original icon content
+                <div className="absolute top-6 right-6 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                   <Heart className="w-6 h-6 text-red-500" />
                 </div>
                 <div className="mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-20 h-20 bg-linear-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
                     <Heart className="w-10 h-10 text-white" />
                   </div>
                 </div>
@@ -123,16 +168,28 @@ export default function Hero() {
                 </h3>
                 <p className="text-sm text-gray-600">
                   Curated picks based on your taste
-                </p> */}
+                </p>
+                */}
+                {/* Option F — Step 3 */}
+                <div className="text-7xl font-black text-gray-100 leading-none mb-6 select-none">
+                  03
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Get Matched
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Receive tailored recommendations built around your taste
+                </p>
               </div>
 
               {/* Icon Card 4 */}
               <div className="group relative bg-white border-2 border-gray-100 rounded-3xl p-10 hover:border-orange-300 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 mt-12">
-                {/* <div className="absolute top-6 right-6 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                {/* Original icon content
+                <div className="absolute top-6 right-6 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                   <Shield className="w-6 h-6 text-green-500" />
                 </div>
                 <div className="mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-20 h-20 bg-linear-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
                     <Shield className="w-10 h-10 text-white" />
                   </div>
                 </div>
@@ -141,7 +198,18 @@ export default function Hero() {
                 </h3>
                 <p className="text-sm text-gray-600">
                   Your privacy is our top priority
-                </p> */}
+                </p>
+                */}
+                {/* Option F — Step 4 */}
+                <div className="text-7xl font-black text-gray-100 leading-none mb-6 select-none">
+                  04
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Checkout Securely
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Buy with confidence using trusted, encrypted payments
+                </p>
               </div>
             </div>
 
@@ -149,7 +217,7 @@ export default function Hero() {
             <div className="absolute -top-6 -left-6 w-24 h-24 bg-orange-200 rounded-full blur-3xl opacity-50 animate-pulse"></div>
             <div
               className="absolute -bottom-6 -right-6 w-32 h-32 bg-blue-200 rounded-full blur-3xl opacity-50 animate-pulse"
-              style={{ animationDelay: "1s" }}
+              style={{ animationDelay: '1s' }}
             ></div>
           </div>
         </div>
