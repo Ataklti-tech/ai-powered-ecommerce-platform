@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 const cartSchema = mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: [true],
       unique: true,
     },
@@ -13,13 +13,13 @@ const cartSchema = mongoose.Schema(
       {
         product: {
           type: mongoose.Schema.ObjectId,
-          ref: "Product",
+          ref: 'Product',
           required: true,
         },
         quantity: {
           type: Number,
           required: true,
-          min: [1, "Quantity must be at least 1"],
+          min: [1, 'Quantity must be at least 1'],
           default: 1,
         },
         addedAt: {
@@ -46,5 +46,5 @@ const cartSchema = mongoose.Schema(
   }
 );
 
-const Cart = mongoose.model("Cart", cartSchema);
+const Cart = mongoose.model('Cart', cartSchema);
 module.exports = Cart;
