@@ -1,10 +1,10 @@
-const AppError = require("../../utils/constants/appError");
-const catchAsync = require("../../utils/constants/catchAsync");
-const Product = require("./../../models/productModel");
-const APIFeatures = require("./../../utils/constants/apifeatures");
+const AppError = require('../../utils/constants/appError');
+const catchAsync = require('../../utils/constants/catchAsync');
+const Product = require('./../../models/productModel');
+const APIFeatures = require('./../../utils/constants/apifeatures');
 const {
   trackActivity,
-} = require("./../../controllers/analytics/userActivityController");
+} = require('./../../controllers/analytics/userActivityController');
 
 // Route handlers
 // create product (admin only)
@@ -12,7 +12,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
   const product = await Product.create(req.body);
   res.status(201).json({
     success: true,
-    message: "Product created successfully",
+    message: 'Product created successfully',
     data: product,
   });
 });
@@ -20,6 +20,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 // get all products
 exports.getAllProducts = catchAsync(async (req, res) => {
   const apifeatures = new APIFeatures(Product.find(), req.query)
+    .search()
     .filter()
     .sort()
     .limitFields()
@@ -39,13 +40,13 @@ exports.getAllProducts = catchAsync(async (req, res) => {
 exports.getProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
   // updateAnalytics
-  product.updateAnalytics("view");
+  product.updateAnalytics('view');
 
   if (req.user) {
-    trackActivity(req.user.id, product._id, "view");
+    trackActivity(req.user.id, product._id, 'view');
   }
   await product.save();
 
@@ -60,10 +61,10 @@ exports.getProductBySlug = catchAsync(async (req, res, next) => {
   const product = await Product.findOne({ slug: req.params.slug });
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
-  product.updateAnalytics("view");
+  product.updateAnalytics('view');
   await product.save();
 
   res.status(200).json({
@@ -77,7 +78,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
   let product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   product = await Product.findByIdAndUpdate(req.params.id, req.body, {
@@ -87,7 +88,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product updated successfully",
+    message: 'Product updated successfully',
     data: product,
   });
 });
@@ -97,14 +98,14 @@ exports.deleteProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   await Product.findByIdAndDelete(req.params.id);
 
   res.status(200).json({
     success: true,
-    message: "Product deleted successfully",
+    message: 'Product deleted successfully',
   });
 });
 
@@ -172,10 +173,11 @@ exports.getTrending = catchAsync(async (req, res, next) => {
 
 // Search Products
 exports.searchProducts = catchAsync(async (req, res, next) => {
-  const { searchTerm } = req.query;
+  // accept both ?keyword= (frontend) and ?searchTerm= (legacy)
+  const searchTerm = req.query.keyword || req.query.searchTerm;
 
   if (!searchTerm) {
-    return next(new AppError("Search term is required", 400));
+    return next(new AppError('Search term is required', 400));
   }
 
   const filters = {
@@ -190,7 +192,7 @@ exports.searchProducts = catchAsync(async (req, res, next) => {
 
   // tracking search activity
   if (req.user && products.length > 0) {
-    trackActivity(req.user.id, products[0]._id, "search");
+    trackActivity(req.user.id, products[0]._id, 'search');
   }
 
   res.status(200).json({
@@ -212,7 +214,7 @@ exports.getRelatedProducts = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get Products by Category
+// Get Products by Category (using category ID)
 exports.getByCategory = catchAsync(async (req, res, next) => {
   const { categoryId } = req.params;
   const page = req.query.page || 1;
@@ -221,7 +223,7 @@ exports.getByCategory = catchAsync(async (req, res, next) => {
   const products = await Product.getByCategory(categoryId, page, limit);
   const totalCount = await Product.countDocuments({
     category: categoryId,
-    status: "active",
+    status: 'active',
   });
 
   res.status(200).json({
@@ -230,6 +232,61 @@ exports.getByCategory = catchAsync(async (req, res, next) => {
     totalCount,
     page,
     limit,
+    data: products,
+  });
+});
+
+// Get Products by Category Name (using category name string)
+exports.getByCategoryName = catchAsync(async (req, res, next) => {
+  const { categoryName } = req.params;
+  const page = parseInt(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 12;
+  const skip = (page - 1) * limit;
+
+  // First, find the category by name (case-insensitive)
+  const Category = require('./../../models/categoryModel');
+  const category = await Category.findOne({
+    name: { $regex: new RegExp(`^${categoryName}$`, 'i') },
+  });
+
+  if (!category) {
+    return res.status(200).json({
+      success: true,
+      count: 0,
+      totalCount: 0,
+      page,
+      limit,
+      data: [],
+      message: 'Category not found',
+    });
+  }
+
+  // Get products for this category
+  const products = await Product.find({
+    category: category._id,
+    status: 'active',
+  })
+    .populate('category', 'name slug')
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  const totalCount = await Product.countDocuments({
+    category: category._id,
+    status: 'active',
+  });
+
+  res.status(200).json({
+    success: true,
+    count: products.length,
+    totalCount,
+    page,
+    limit,
+    category: {
+      _id: category._id,
+      name: category.name,
+      slug: category.slug,
+    },
     data: products,
   });
 });
@@ -252,7 +309,7 @@ exports.updateProductAnalytics = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   product.updateAnalytics(action, quantity);
@@ -260,7 +317,7 @@ exports.updateProductAnalytics = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Analytics updated successfully",
+    message: 'Analytics updated successfully',
     data: product.analytics,
   });
 });
@@ -270,15 +327,15 @@ exports.addToCart = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
-  product.updateAnalytics("addToCart");
+  product.updateAnalytics('addToCart');
   await product.save();
 
   res.status(200).json({
     success: true,
-    message: "Product added to cart analytics",
+    message: 'Product added to cart analytics',
     data: product,
   });
 });
@@ -288,15 +345,15 @@ exports.addToWishlist = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
-  product.updateAnalytics("wishlist");
+  product.updateAnalytics('wishlist');
   await product.save();
 
   res.status(200).json({
     success: true,
-    message: "Product added to wishlist analytics",
+    message: 'Product added to wishlist analytics',
     data: product,
   });
 });
@@ -306,13 +363,13 @@ exports.reduceStock = catchAsync(async (req, res, next) => {
   const { quantity } = req.body;
 
   if (!quantity || quantity <= 0) {
-    return next(new AppError("Invalid quantity", 400));
+    return next(new AppError('Invalid quantity', 400));
   }
 
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   if (!product.checkStock(quantity)) {
@@ -325,7 +382,7 @@ exports.reduceStock = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Stock reduced successfully",
+    message: 'Stock reduced successfully',
     remainingStock: product.stock,
     data: product,
   });
@@ -336,20 +393,20 @@ exports.restoreStock = catchAsync(async (req, res, next) => {
   const { quantity } = req.body;
 
   if (!quantity || quantity <= 0) {
-    return next(new AppError("Invalid quantity", 400));
+    return next(new AppError('Invalid quantity', 400));
   }
 
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   await product.restoreStock(quantity);
 
   res.status(200).json({
     success: true,
-    message: "Stock restored successfully",
+    message: 'Stock restored successfully',
     currentStock: product.stock,
     data: product,
   });
@@ -360,7 +417,7 @@ exports.getProductWithReviews = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   await product.getProductWithReviews();
@@ -376,7 +433,7 @@ exports.getProductAPI = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   const apiResponse = product.toAPI();
@@ -392,13 +449,13 @@ exports.getHotProducts = catchAsync(async (req, res, next) => {
   const limit = req.query.limit || 10;
 
   const products = await Product.find({
-    status: "active",
+    status: 'active',
     $or: [
-      { "analytics.purchases": { $gt: 50 } },
-      { "analytics.views": { $gt: 500 } },
+      { 'analytics.purchases': { $gt: 50 } },
+      { 'analytics.views': { $gt: 500 } },
     ],
   })
-    .sort({ "analytics.purchases": -1 })
+    .sort({ 'analytics.purchases': -1 })
     .limit(limit);
 
   res.status(200).json({
@@ -413,13 +470,13 @@ exports.updateProductRating = catchAsync(async (req, res, next) => {
   const { rating } = req.body;
 
   if (rating < 1 || rating > 5) {
-    return next(new AppError("Rating must be between 1 and 5", 400));
+    return next(new AppError('Rating must be between 1 and 5', 400));
   }
 
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new AppError("Product not found", 404));
+    return next(new AppError('Product not found', 404));
   }
 
   // Update rating distribution
@@ -442,7 +499,7 @@ exports.updateProductRating = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product rating updated successfully",
+    message: 'Product rating updated successfully',
     data: product.rating,
   });
 });
@@ -452,12 +509,12 @@ exports.bulkUpdateStatus = catchAsync(async (req, res, next) => {
   const { productIds, status } = req.body;
 
   if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
-    return next(new AppError("Invalid product IDs", 400));
+    return next(new AppError('Invalid product IDs', 400));
   }
 
-  const validStatuses = ["draft", "active", "inactive", "out_of_stock"];
+  const validStatuses = ['draft', 'active', 'inactive', 'out_of_stock'];
   if (!validStatuses.includes(status)) {
-    return next(new AppError("Invalid status", 400));
+    return next(new AppError('Invalid status', 400));
   }
 
   const result = await Product.updateMany(
@@ -467,7 +524,7 @@ exports.bulkUpdateStatus = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Products status updated successfully",
+    message: 'Products status updated successfully',
     modifiedCount: result.modifiedCount,
   });
 });
@@ -475,9 +532,9 @@ exports.bulkUpdateStatus = catchAsync(async (req, res, next) => {
 // Get Product Statistics (Admin Only)
 exports.getProductStatistics = catchAsync(async (req, res, next) => {
   const totalProducts = await Product.countDocuments();
-  const activeProducts = await Product.countDocuments({ status: "active" });
+  const activeProducts = await Product.countDocuments({ status: 'active' });
   const outOfStockProducts = await Product.countDocuments({
-    status: "out_of_stock",
+    status: 'out_of_stock',
   });
   const featuredProducts = await Product.countDocuments({ isFeatured: true });
   const saleProducts = await Product.countDocuments({ isOnSale: true });
@@ -489,9 +546,9 @@ exports.getProductStatistics = catchAsync(async (req, res, next) => {
     {
       $group: {
         _id: null,
-        averageRating: { $avg: "$rating.average" },
-        totalViews: { $sum: "$analytics.views" },
-        totalPurchases: { $sum: "$analytics.purchases" },
+        averageRating: { $avg: '$rating.average' },
+        totalViews: { $sum: '$analytics.views' },
+        totalPurchases: { $sum: '$analytics.purchases' },
       },
     },
   ]);
