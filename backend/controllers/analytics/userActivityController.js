@@ -1,6 +1,7 @@
-const UserActivity = require("./../../models/userActivityModel");
-const Product = require("./../../models/productModel");
-const catchAsync = require("../../utils/constants/catchAsync");
+const mongoose = require('mongoose');
+const UserActivity = require('./../../models/userActivityModel');
+const Product = require('./../../models/productModel');
+const catchAsync = require('../../utils/constants/catchAsync');
 
 // tracking activity (will be called from other controllers)
 exports.trackActivity = catchAsync(
@@ -16,7 +17,7 @@ exports.trackActivity = catchAsync(
       console.log(`Tracked: ${activityType} for user ${userId}`);
       return activity;
     } catch (error) {
-      console.log("Activity tracking error: ", error);
+      console.log('Activity tracking error: ', error);
       return null;
     }
   }
@@ -47,7 +48,7 @@ exports.getUserActivities = catchAsync(async (req, res) => {
     }
 
     const activities = await UserActivity.find(filter)
-      .populate("product", "name price image category")
+      .populate('product', 'name price image category')
       .sort({ timestamp: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
@@ -62,7 +63,7 @@ exports.getUserActivities = catchAsync(async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      status: "fail",
+      status: 'fail',
       message: error.message,
     });
   }
@@ -74,10 +75,10 @@ exports.getUserActivityStats = catchAsync(async (req, res) => {
     const userId = req.user.id;
 
     const stats = await UserActivity.aggregate([
-      { $match: { user: mongoose.Types.ObjectId(userId) } },
+      { $match: { user: new mongoose.Types.ObjectId(userId) } },
       {
         $group: {
-          _id: "$activityType",
+          _id: '$activityType',
           count: { $sum: 1 },
         },
       },
@@ -87,13 +88,13 @@ exports.getUserActivityStats = catchAsync(async (req, res) => {
     const mostViewed = await UserActivity.aggregate([
       {
         $match: {
-          user: mongoose.Types.ObjectId(userId),
-          activityType: "view",
+          user: new mongoose.Types.ObjectId(userId),
+          activityType: 'view',
         },
       },
       {
         $group: {
-          _id: "$product",
+          _id: '$product',
           viewCount: { $sum: 1 },
         },
       },
@@ -101,13 +102,13 @@ exports.getUserActivityStats = catchAsync(async (req, res) => {
       { $limit: 10 },
       {
         $lookup: {
-          from: "products",
-          localField: "_id",
-          foreignField: "_id",
-          as: "product",
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'product',
         },
       },
-      { $unwind: "$product" },
+      { $unwind: '$product' },
     ]);
 
     res.status(200).json({
@@ -119,7 +120,7 @@ exports.getUserActivityStats = catchAsync(async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      status: "failed",
+      status: 'failed',
       message: error.message,
     });
   }
@@ -128,7 +129,7 @@ exports.getUserActivityStats = catchAsync(async (req, res) => {
 // exporting data for ML training
 exports.exportActivityData = catchAsync(async (req, res) => {
   try {
-    const { startDate, endDate, format = "json" } = req.query;
+    const { startDate, endDate, format = 'json' } = req.query;
     const filter = {};
     if (startDate || endDate) {
       filter.timestamp = {};
@@ -136,17 +137,17 @@ exports.exportActivityData = catchAsync(async (req, res) => {
       if (endDate) filter.timestamp.$lte = new Date(endDate);
     }
     const activities = await UserActivity.find(filter)
-      .populate("user", "id email")
-      .populate("product", "id name category price")
+      .populate('user', 'id email')
+      .populate('product', 'id name category price')
       .lean();
 
-    if (format === "csv") {
+    if (format === 'csv') {
       // Convert to CSV format for ML
       const csv = convertToCSV(activities);
-      res.setHeader("Content-Type", "text/csv");
+      res.setHeader('Content-Type', 'text/csv');
       res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=user_activities.csv"
+        'Content-Disposition',
+        'attachment; filename=user_activities.csv'
       );
       return res.send(csv);
     }
@@ -158,7 +159,7 @@ exports.exportActivityData = catchAsync(async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      status: "fail",
+      status: 'fail',
       message: error.message,
     });
   }
@@ -167,13 +168,13 @@ exports.exportActivityData = catchAsync(async (req, res) => {
 // function for converting to CSV
 function convertToCSV(activities) {
   const header =
-    "user_id, product_id, activity_type, category, price, timestamp\n";
+    'user_id, product_id, activity_type, category, price, timestamp\n';
 
   const rows = activities
     .map((a) => {
       return `${a.user._id}, ${a.product._id}, ${a.activityType}, ${a.product.category}, ${a.product.price}, ${a.timestamp}`;
     })
-    .join("\n");
+    .join('\n');
 
   return header + rows;
 }
