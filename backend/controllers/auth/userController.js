@@ -1,10 +1,8 @@
-const User = require("./../../models/userModel");
-const catchAsync = require("./../../utils/constants/catchAsync");
-const AppError = require("./../../utils/constants/appError");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const mongoose = require("mongoose");
-const sendEmail = require("./../../services/email/emailService");
+const User = require('./../../models/userModel');
+const catchAsync = require('./../../utils/constants/catchAsync');
+const AppError = require('./../../utils/constants/appError');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -20,14 +18,14 @@ const createSendToken = (user, statusCode, res) => {
     ),
     httpOnly: true,
   };
-  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
-  res.cookie("jwt", token, cookieOptions);
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+  res.cookie('jwt', token, cookieOptions);
 
   // Remove password from output
   user.password = undefined;
 
   res.status(statusCode).json({
-    status: "Success",
+    status: 'Success',
     token,
     data: {
       user,
@@ -45,13 +43,13 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 
   // fetching users excluding passwords, with pagination and sorting
   const users = await User.find()
-    .select("-password")
+    .select('-password')
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 });
   // send status
   res.status(200).json({
-    status: "success",
+    status: 'success',
     results: users.length,
     date: users,
   });
@@ -59,9 +57,9 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 
 // Get single user by ID
 exports.getUser = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.params.id).select("-password");
+  const user = await User.findById(req.params.id).select('-password');
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
   res.status(200).json({
     success: true,
@@ -84,7 +82,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
   // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(new AppError("User already exists with this email", 400));
+    return next(new AppError('User already exists with this email', 400));
   }
 
   const user = await User.create({
@@ -100,14 +98,14 @@ exports.createUser = catchAsync(async (req, res, next) => {
   // let us check/verify collection existence
   const collections = await mongoose.connection.db.listCollections().toArray();
   const collectionNames = collections.map((col) => col.name);
-  console.log("Available collections:", collectionNames);
+  console.log('Available collections:', collectionNames);
 
   createSendToken(user, 201, res);
 });
 
 // Get current logged in user
 exports.getCurrentUser = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).select("-password");
+  const user = await User.findById(req.user.id).select('-password');
 
   res.status(200).json({
     success: true,
@@ -119,9 +117,9 @@ exports.getCurrentUser = catchAsync(async (req, res, next) => {
 exports.getUserByEmail = catchAsync(async (req, res, next) => {
   const { email } = req.params;
 
-  const user = await User.findOne({ email }).select("-password");
+  const user = await User.findOne({ email }).select('-password');
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   res.status(200).json({
@@ -134,18 +132,18 @@ exports.getUserByEmail = catchAsync(async (req, res, next) => {
 exports.searchUsers = catchAsync(async (req, res, next) => {
   const { searchTerm } = req.query;
   if (!searchTerm) {
-    return next(new AppError("Search term is required", 400));
+    return next(new AppError('Search term is required', 400));
   }
 
   const users = await User.find({
     $or: [
-      { firstName: { $regex: searchTerm, $options: "i" } },
-      { lastName: { $regex: searchTerm, $options: "i" } },
-      { email: { $regex: searchTerm, $options: "i" } },
-      { phone: { $regex: searchTerm, $options: "i" } },
+      { firstName: { $regex: searchTerm, $options: 'i' } },
+      { lastName: { $regex: searchTerm, $options: 'i' } },
+      { email: { $regex: searchTerm, $options: 'i' } },
+      { phone: { $regex: searchTerm, $options: 'i' } },
     ],
   })
-    .select("-password")
+    .select('-password')
     .limit(50);
 
   res.status(200).json({
@@ -163,11 +161,11 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
     req.user.id,
     { firstName, lastName, phone },
     { new: true, runValidators: true }
-  ).select("-password");
+  ).select('-password');
 
   res.status(200).json({
     success: true,
-    message: "Profile updated successfully",
+    message: 'Profile updated successfully',
     data: user,
   });
 });
@@ -176,46 +174,29 @@ exports.updateUserProfile = catchAsync(async (req, res, next) => {
 exports.updateUserEmail = catchAsync(async (req, res, next) => {
   const { newEmail, password } = req.body;
   if (!newEmail || !password) {
-    return next(new AppError("New email and password are required", 400));
+    return next(new AppError('New email and password are required', 400));
   }
 
   const user = await User.findById(req.user.id);
 
   // verify password before updating email
-  const isPasswordValid = await user.comparePassword(password);
+  const isPasswordValid = await user.correctPassword(password, user.password);
   if (!isPasswordValid) {
-    return next(new AppError("Incorrect password", 401));
+    return next(new AppError('Incorrect password', 401));
   }
   // check if new email already exists
   const existingUser = await User.findOne({ email: newEmail });
   if (existingUser) {
-    return next(new AppError("Email already in use", 400));
+    return next(new AppError('Email already in use', 400));
   }
 
   user.email = newEmail;
-  user.emailVerified = false;
-  user.emailVerificationToken = crypto.randomBytes(32).toString("hex");
-  user.emailVerificationExpiry = Date.now() + 24 * 60 * 60 * 1000;
-
-  await user.save();
-
-  // Send verification email
-  const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${user.emailVerificationToken}`;
-  const message = `Click the link to verify your new email: ${verificationUrl}`;
-
-  await sendEmail({
-    email: newEmail,
-    subject: "Email Verification",
-    message,
-  });
+  await user.save({ validateBeforeSave: false });
 
   res.status(200).json({
     success: true,
-    message: "Email updated. Please verify your new email address.",
-    data: {
-      email: user.email,
-      emailVerified: user.emailVerified,
-    },
+    message: 'Email updated successfully.',
+    data: { email: user.email },
   });
 });
 // Update User Username
@@ -223,21 +204,21 @@ exports.updateUsername = catchAsync(async (req, res, next) => {
   const { newUsername, password } = req.body;
 
   if (!newUsername || !password) {
-    return next(new AppError("New username and password are required", 400));
+    return next(new AppError('New username and password are required', 400));
   }
 
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id).select('+password');
 
   // Verify password
-  const isPasswordValid = await user.comparePassword(password);
+  const isPasswordValid = await user.correctPassword(password, user.password);
   if (!isPasswordValid) {
-    return next(new AppError("Incorrect password", 401));
+    return next(new AppError('Incorrect password', 401));
   }
 
   // Check if username already exists
   const existingUser = await User.findOne({ username: newUsername });
   if (existingUser && existingUser._id.toString() !== req.user.id) {
-    return next(new AppError("Username already taken", 400));
+    return next(new AppError('Username already taken', 400));
   }
 
   user.username = newUsername;
@@ -245,7 +226,7 @@ exports.updateUsername = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Username updated successfully",
+    message: 'Username updated successfully',
     data: {
       username: user.username,
     },
@@ -259,51 +240,53 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   if (!oldPassword || !newPassword || !confirmPassword) {
     return next(
       new AppError(
-        "Old password, new password, and confirm password are required",
+        'Old password, new password, and confirm password are required',
         400
       )
     );
   }
 
   if (newPassword !== confirmPassword) {
-    return next(new AppError("Passwords do not match", 400));
+    return next(new AppError('Passwords do not match', 400));
   }
 
   if (newPassword.length < 6) {
     return next(
-      new AppError("New password must be at least 6 characters long", 400)
+      new AppError('New password must be at least 6 characters long', 400)
     );
   }
 
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id).select('+password');
 
   // Verify old password
-  const isPasswordValid = await user.comparePassword(oldPassword);
+  const isPasswordValid = await user.correctPassword(oldPassword, user.password);
   if (!isPasswordValid) {
-    return next(new AppError("Old password is incorrect", 401));
+    return next(new AppError('Old password is incorrect', 401));
   }
 
   user.password = newPassword;
+  user.passwordConfirm = newPassword;
   await user.save();
 
-  sendToken(user, 200, res, "Password updated successfully");
+  createSendToken(user, 200, res);
 });
 
 // Update User Address
 exports.updateUserAddress = catchAsync(async (req, res, next) => {
-  const { street, city, state, postalCode, country, isDefault } = req.body;
+  const { label, street, city, state, zipCode, country, isDefault } = req.body;
 
-  if (!street || !city || !state || !postalCode || !country) {
-    return next(new AppError("All address fields are required", 400));
+  if (!street || !city || !state || !country) {
+    return next(new AppError('Street, city, state, and country are required', 400));
   }
 
   const user = await User.findById(req.user.id);
 
   const newAddress = {
+    label: label || 'home',
     street,
     city,
     state,
-    postalCode,
+    zipCode: zipCode || '',
     country,
     isDefault: isDefault || false,
   };
@@ -317,7 +300,7 @@ exports.updateUserAddress = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Address added successfully",
+    message: 'Address added successfully',
     data: user.addresses,
   });
 });
@@ -327,7 +310,7 @@ exports.getUserAddresses = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   res.status(200).json({
@@ -340,12 +323,12 @@ exports.getUserAddresses = catchAsync(async (req, res, next) => {
 // Update Specific Address
 exports.updateSpecificAddress = catchAsync(async (req, res, next) => {
   const { addressId } = req.params;
-  const { street, city, state, postalCode, country, isDefault } = req.body;
+  const { street, city, state, zipCode, country, isDefault } = req.body;
 
   const user = await User.findById(req.user.id);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   const addressIndex = user.addresses.findIndex(
@@ -353,13 +336,13 @@ exports.updateSpecificAddress = catchAsync(async (req, res, next) => {
   );
 
   if (addressIndex === -1) {
-    return next(new AppError("Address not found", 404));
+    return next(new AppError('Address not found', 404));
   }
 
   if (street) user.addresses[addressIndex].street = street;
   if (city) user.addresses[addressIndex].city = city;
   if (state) user.addresses[addressIndex].state = state;
-  if (postalCode) user.addresses[addressIndex].postalCode = postalCode;
+  if (zipCode !== undefined) user.addresses[addressIndex].zipCode = zipCode;
   if (country) user.addresses[addressIndex].country = country;
 
   if (isDefault) {
@@ -371,7 +354,7 @@ exports.updateSpecificAddress = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Address updated successfully",
+    message: 'Address updated successfully',
     data: user.addresses[addressIndex],
   });
 });
@@ -383,7 +366,7 @@ exports.deleteUserAddress = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   user.addresses = user.addresses.filter(
@@ -394,7 +377,7 @@ exports.deleteUserAddress = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Address deleted successfully",
+    message: 'Address deleted successfully',
     data: user.addresses,
   });
 });
@@ -404,15 +387,15 @@ exports.updateUserPhone = catchAsync(async (req, res, next) => {
   const { phone, password } = req.body;
 
   if (!phone || !password) {
-    return next(new AppError("Phone and password are required", 400));
+    return next(new AppError('Phone and password are required', 400));
   }
 
   const user = await User.findById(req.user.id);
 
   // Verify password
-  const isPasswordValid = await user.comparePassword(password);
+  const isPasswordValid = await user.correctPassword(password, user.password);
   if (!isPasswordValid) {
-    return next(new AppError("Incorrect password", 401));
+    return next(new AppError('Incorrect password', 401));
   }
 
   user.phone = phone;
@@ -420,7 +403,7 @@ exports.updateUserPhone = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Phone number updated successfully",
+    message: 'Phone number updated successfully',
     data: {
       phone: user.phone,
     },
@@ -430,7 +413,7 @@ exports.updateUserPhone = catchAsync(async (req, res, next) => {
 // Update User Profile Picture
 exports.updateUserProfilePicture = catchAsync(async (req, res, next) => {
   if (!req.file) {
-    return next(new AppError("Please upload an image", 400));
+    return next(new AppError('Please upload an image', 400));
   }
 
   const user = await User.findById(req.user.id);
@@ -440,7 +423,7 @@ exports.updateUserProfilePicture = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Profile picture updated successfully",
+    message: 'Profile picture updated successfully',
     data: {
       profilePicture: user.profilePicture,
     },
@@ -455,14 +438,14 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
   const user = await User.findById(userId);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   // Check email uniqueness if changing
   if (email && email !== user.email) {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return next(new AppError("Email already in use", 400));
+      return next(new AppError('Email already in use', 400));
     }
     user.email = email;
   }
@@ -477,7 +460,7 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "User data updated successfully",
+    message: 'User data updated successfully',
     data: user,
   });
 });
@@ -487,19 +470,19 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
   const userId = req.params.id;
 
   // Check if user is deleting themselves or is admin
-  if (req.user.id !== userId && req.user.role !== "admin") {
-    return next(new AppError("Not authorized to delete this user", 403));
+  if (req.user.id !== userId && req.user.role !== 'admin') {
+    return next(new AppError('Not authorized to delete this user', 403));
   }
 
   const user = await User.findByIdAndDelete(userId);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   res.status(200).json({
     success: true,
-    message: "User deleted successfully",
+    message: 'User deleted successfully',
   });
 });
 
@@ -508,7 +491,7 @@ exports.deactivateUserAccount = catchAsync(async (req, res, next) => {
   const { password } = req.body;
 
   if (!password) {
-    return next(new AppError("Password is required", 400));
+    return next(new AppError('Password is required', 400));
   }
 
   const user = await User.findById(req.user.id);
@@ -516,7 +499,7 @@ exports.deactivateUserAccount = catchAsync(async (req, res, next) => {
   // Verify password
   const isPasswordValid = await user.comparePassword(password);
   if (!isPasswordValid) {
-    return next(new AppError("Incorrect password", 401));
+    return next(new AppError('Incorrect password', 401));
   }
 
   user.isActive = false;
@@ -525,7 +508,7 @@ exports.deactivateUserAccount = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Account deactivated successfully",
+    message: 'Account deactivated successfully',
   });
 });
 
@@ -534,14 +517,16 @@ exports.reactivateUserAccount = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
-  user.isActive = true;
-  user.deactivatedAt = null;
-  await user.save();
+  user.active = true;
+  await user.save({ validateBeforeSave: false });
 
-  sendToken(user, 200, res, "Account reactivated successfully");
+  res.status(200).json({
+    success: true,
+    message: 'Account reactivated successfully',
+  });
 });
 
 // Add User to Wishlist
@@ -549,13 +534,13 @@ exports.addToWishlist = catchAsync(async (req, res, next) => {
   const { productId } = req.body;
 
   if (!productId) {
-    return next(new AppError("Product ID is required", 400));
+    return next(new AppError('Product ID is required', 400));
   }
 
   const user = await User.findById(req.user.id);
 
   if (user.wishlist.includes(productId)) {
-    return next(new AppError("Product already in wishlist", 400));
+    return next(new AppError('Product already in wishlist', 400));
   }
 
   user.wishlist.push(productId);
@@ -563,7 +548,7 @@ exports.addToWishlist = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product added to wishlist",
+    message: 'Product added to wishlist',
     data: user.wishlist,
   });
 });
@@ -579,14 +564,14 @@ exports.removeFromWishlist = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product removed from wishlist",
+    message: 'Product removed from wishlist',
     data: user.wishlist,
   });
 });
 
 // Get User Wishlist
 exports.getWishlist = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate("wishlist");
+  const user = await User.findById(req.user.id).populate('wishlist');
 
   res.status(200).json({
     success: true,
@@ -600,13 +585,13 @@ exports.addToFavorites = catchAsync(async (req, res, next) => {
   const { productId } = req.body;
 
   if (!productId) {
-    return next(new AppError("Product ID is required", 400));
+    return next(new AppError('Product ID is required', 400));
   }
 
   const user = await User.findById(req.user.id);
 
   if (user.favorites.includes(productId)) {
-    return next(new AppError("Product already in favorites", 400));
+    return next(new AppError('Product already in favorites', 400));
   }
 
   user.favorites.push(productId);
@@ -614,7 +599,7 @@ exports.addToFavorites = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product added to favorites",
+    message: 'Product added to favorites',
     data: user.favorites,
   });
 });
@@ -630,14 +615,14 @@ exports.removeFromFavorites = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "Product removed from favorites",
+    message: 'Product removed from favorites',
     data: user.favorites,
   });
 });
 
 // Get User Favorites
 exports.getFavorites = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate("favorites");
+  const user = await User.findById(req.user.id).populate('favorites');
 
   res.status(200).json({
     success: true,
@@ -653,17 +638,17 @@ exports.updateUserPreferences = catchAsync(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.user.id,
     {
-      "preferences.emailNotifications": emailNotifications,
-      "preferences.smsNotifications": smsNotifications,
-      "preferences.newsletter": newsletter,
-      "preferences.theme": theme,
+      'preferences.emailNotifications': emailNotifications,
+      'preferences.smsNotifications': smsNotifications,
+      'preferences.newsletter': newsletter,
+      'preferences.theme': theme,
     },
     { new: true, runValidators: true }
-  ).select("-password");
+  ).select('-password');
 
   res.status(200).json({
     success: true,
-    message: "Preferences updated successfully",
+    message: 'Preferences updated successfully',
     data: user.preferences,
   });
 });
@@ -673,8 +658,8 @@ exports.getUserStatistics = catchAsync(async (req, res, next) => {
   const totalUsers = await User.countDocuments();
   const activeUsers = await User.countDocuments({ isActive: true });
   const inactiveUsers = await User.countDocuments({ isActive: false });
-  const adminUsers = await User.countDocuments({ role: "admin" });
-  const customerUsers = await User.countDocuments({ role: "customer" });
+  const adminUsers = await User.countDocuments({ role: 'admin' });
+  const customerUsers = await User.countDocuments({ role: 'customer' });
 
   const usersCreatedThisMonth = await User.countDocuments({
     createdAt: {
@@ -698,10 +683,10 @@ exports.getUserStatistics = catchAsync(async (req, res, next) => {
 
 // Get User Orders
 exports.getUserOrders = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate("orders");
+  const user = await User.findById(req.user.id).populate('orders');
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   res.status(200).json({
@@ -713,10 +698,10 @@ exports.getUserOrders = catchAsync(async (req, res, next) => {
 
 // Get User Reviews
 exports.getUserReviews = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate("reviews");
+  const user = await User.findById(req.user.id).populate('reviews');
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   res.status(200).json({
@@ -733,10 +718,10 @@ exports.toggleUserRole = catchAsync(async (req, res, next) => {
   const user = await User.findById(userId);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
-  user.role = user.role === "admin" ? "customer" : "admin";
+  user.role = user.role === 'admin' ? 'user' : 'admin';
   await user.save();
 
   res.status(200).json({
@@ -754,7 +739,7 @@ exports.exportUserData = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
   if (!user) {
-    return next(new AppError("User not found", 404));
+    return next(new AppError('User not found', 404));
   }
 
   const userData = {
@@ -773,7 +758,7 @@ exports.exportUserData = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: "User data exported successfully",
+    message: 'User data exported successfully',
     data: userData,
   });
 });
