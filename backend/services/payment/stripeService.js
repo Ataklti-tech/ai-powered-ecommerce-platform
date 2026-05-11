@@ -1,8 +1,16 @@
 const catchAsync = require("../../utils/constants/catchAsync");
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+let _stripe = null;
+const getStripe = () => {
+  if (!_stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is not configured');
+    _stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  }
+  return _stripe;
+};
 
 exports.startPayment = catchAsync(async (order, customer) => {
+  const stripe = getStripe();
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(order.totalAmount * 100),
     currency: "usd",
@@ -23,6 +31,7 @@ exports.startPayment = catchAsync(async (order, customer) => {
 });
 
 exports.verifyPayment = catchAsync(async (paymentIntentId) => {
+  const stripe = getStripe();
   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
   return {
@@ -34,7 +43,7 @@ exports.verifyPayment = catchAsync(async (paymentIntentId) => {
 });
 
 exports.verifyWebhookSignature = (payload, signature) => {
-  return stripe.webhooks.constructEvent(
+  return getStripe().webhooks.constructEvent(
     payload,
     signature,
     process.env.STRIPE_WEBHOOK_SECRET
