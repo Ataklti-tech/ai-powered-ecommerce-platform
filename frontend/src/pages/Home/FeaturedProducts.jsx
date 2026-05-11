@@ -141,7 +141,7 @@ const FeaturedProducts = ({ products = [], loading = false, error = null }) => {
 
                 {/* Price */}
                 <div className="product-card__price-wrapper">
-                  <span className="product-card__price">${product.price}</span>
+                  <span className="product-card__price">USh {Math.round((product.price || 0) * 3650).toLocaleString()}</span>
                   {product.originalPrice && (
                     <span className="product-card__original-price">
                       ${product.originalPrice}
