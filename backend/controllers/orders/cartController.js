@@ -101,19 +101,18 @@ exports.getCart = catchAsync(async (req, res, next) => {
   });
 
   if (!cart) {
-    // create an empty cart if it doesn't exist
     cart = await Cart.create({
       user: userId,
       items: [],
       totalItems: 0,
       totalPrice: 0,
     });
-
-    res.status(200).json({
-      success: true,
-      data: cart,
-    });
   }
+
+  res.status(200).json({
+    success: true,
+    data: cart,
+  });
 });
 exports.updateCartItem = catchAsync(async (req, res, next) => {
   const { productId, quantity } = req.body;
@@ -395,6 +394,57 @@ exports.decreaseQuantity;
 
 exports.mergeCarts = catchAsync(async (req, res, next) => {
   const { guestCartItems } = req.body;
+  const userId = req.user.id;
+
+  let cart = await Cart.findOne({ user: userId });
+  if (!cart) {
+    cart = await Cart.create({ user: userId, items: [], totalItems: 0, totalPrice: 0 });
+  }
+
+  if (Array.isArray(guestCartItems) && guestCartItems.length > 0) {
+    for (const guestItem of guestCartItems) {
+      const productId =
+        guestItem.product?._id ||
+        guestItem.product?.id ||
+        guestItem.productId ||
+        guestItem.id;
+      const quantity = guestItem.quantity || 1;
+
+      if (!productId) continue;
+
+      const product = await Product.findById(productId);
+      if (!product) continue;
+
+      const itemIndex = cart.items.findIndex(
+        (item) => item.product.toString() === productId.toString()
+      );
+
+      if (itemIndex > -1) {
+        const merged = Math.max(cart.items[itemIndex].quantity, quantity);
+        cart.items[itemIndex].quantity = Math.min(merged, product.stock);
+      } else {
+        cart.items.push({
+          product: productId,
+          quantity: Math.min(quantity, product.stock),
+          addedAt: new Date(),
+        });
+      }
+    }
+
+    await calculateCartTotals(cart);
+    await cart.save();
+  }
+
+  await cart.populate({
+    path: "items.product",
+    select: "name price discount description images stock",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Carts merged successfully",
+    data: cart,
+  });
 });
 
 // deleting / removing cart (admin - remove user's cart)
