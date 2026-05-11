@@ -1,0 +1,26 @@
+name: recommender_env_v1
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - jupyter
+  - ipykernel
+  - psycopg2
+  - redis
+  - cython # helps build some pip packages
+  - pip:
+      - lightfm
+      - scikit-surprise
+      - openai
+      - fastapi
+      - uvicorn
+      - python-dotenv
